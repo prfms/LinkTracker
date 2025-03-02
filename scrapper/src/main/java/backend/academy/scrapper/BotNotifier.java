@@ -1,4 +1,4 @@
-package backend.academy.bot;
+package backend.academy.scrapper;
 
 import backend.academy.DTO;
 import org.springframework.stereotype.Service;
@@ -13,7 +13,8 @@ public class BotNotifier {
     }
 
     public DTO.LinkUpdate sendUpdate(DTO.LinkUpdate update) {
-        return restClient.post()
+        return restClient
+            .post()
             .uri("/updates")
             .body(update)
             .retrieve()

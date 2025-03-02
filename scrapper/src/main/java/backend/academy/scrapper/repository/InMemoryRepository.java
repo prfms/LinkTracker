@@ -1,7 +1,7 @@
 package backend.academy.scrapper.repository;
 
 import backend.academy.scrapper.model.Link;
-import org.springframework.data.redis.FallbackExceptionTranslationStrategy;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -16,11 +16,17 @@ public class InMemoryRepository implements Repository {
     }
 
     @Override
-    public int addLink(Link link) {
-        if (!trackedLinks.contains(link)) {
-            trackedLinks.add(link);
+    public int addLink(String url, long chatId, List<String> tags, List<String> filters, Instant lastUpdated) {
+        for (Link link : trackedLinks) {
+            if (link.url().equals(url) && link.chatId() == chatId && link.tags().equals(tags) && link.filters().equals(filters)) {
+                return trackedLinks.indexOf(link);
+            } else {
+                Link addedLink = new Link(trackedLinks.size(), url, chatId, tags, filters, lastUpdated);
+                trackedLinks.add(addedLink);
+                return trackedLinks.indexOf(addedLink);
+            }
         }
-        return trackedLinks.indexOf(link);
+        return -1;
     }
 
     @Override
@@ -45,8 +51,23 @@ public class InMemoryRepository implements Repository {
     }
 
     @Override
+    public List<Link> getAllLinks() {
+        return trackedLinks;
+    }
+
+    @Override
     public long deleteUser(long chatId) {
         this.userId = 0L;
         return chatId;
+    }
+
+    @Override
+    public void updateLastChecked(Link link, Instant lastUpdated) {
+        link.lastUpdated(lastUpdated);
+    }
+
+    @Override
+    public List<Long> findUsersTrackingLink(int id) {
+        return List.of(userId);
     }
 }

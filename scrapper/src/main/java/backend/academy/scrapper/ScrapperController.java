@@ -24,7 +24,7 @@ public class ScrapperController {
     }
 
     @PostMapping("/tg-chat/{id}")
-    public DTO.User registerUser(@RequestBody @PathVariable long id) {
+    public DTO.User registerUser(@PathVariable Long id) {
         long userId = scrapperService.registerUser(id);
         return new DTO.User(userId);
     }
