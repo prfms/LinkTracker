@@ -50,4 +50,13 @@ public class DTO {
     public record RemoveLinkRequest(
         String link
     ) {}
+
+    @Getter
+    @Setter
+    public record LinkUpdate(
+        int id,
+        String url,
+        String description,
+        List<Long> tgChatIds
+    ) {}
 }
