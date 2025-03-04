@@ -5,7 +5,6 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
-import org.springframework.web.reactive.function.BodyInserters;
 
 import java.util.List;
 
@@ -49,7 +48,7 @@ public class ScrapperClient {
     }
 
     public DTO.LinkResponse deleteLink(Long chatId, DTO.RemoveLinkRequest linkRequest) {
-        return restClient .method(HttpMethod.DELETE) // Используем метод DELETE явно
+        return restClient.method(HttpMethod.DELETE) // Используем метод DELETE явно
             .uri("/links")
             .header("Tg-Chat-Id", String.valueOf(chatId))
             .body(linkRequest) // Используем bodyValue() вместо body()

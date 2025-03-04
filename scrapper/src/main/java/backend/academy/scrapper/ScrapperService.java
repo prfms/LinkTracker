@@ -6,8 +6,9 @@ import backend.academy.scrapper.model.Link;
 import backend.academy.scrapper.repository.Repository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import java.time.Instant;
+import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.logging.Logger;
 import backend.academy.scrapper.clients.StackOverflowClient;
 import backend.academy.scrapper.clients.GitHubClient;
 
@@ -17,6 +18,7 @@ public class ScrapperService {
     private final GitHubClient gitHubClient;
     private final StackOverflowClient stackOverflowClient;
     private final BotNotifier botNotifier;
+    private static final Logger LOGGER = Logger.getLogger(ScrapperService.class.getName());
 
     @Autowired
     public ScrapperService(Repository repository, GitHubClient gitHubClient, StackOverflowClient stackOverflowClient, BotNotifier botNotifier) {
@@ -52,13 +54,17 @@ public class ScrapperService {
 
     public void checkAndUpdateLinks() {
         List<Link> links = repository.getAllLinks();
-
+        LOGGER.info("Проверка " + links.size() + " ссылок на обновления");
         for (Link link : links) {
-            Instant newLastUpdated = getLastUpdatedTime(link.url());
+            OffsetDateTime newLastUpdated = getLastUpdatedTime(link.url());
+            LOGGER.info("Ссылка: " + link.url() + " | Старый lastUpdated: " + link.lastUpdated() + " | Новый lastUpdated: " + newLastUpdated);
 
             if (newLastUpdated != null && newLastUpdated.isAfter(link.lastUpdated())) {
                 repository.updateLastChecked(link, newLastUpdated);
+                LOGGER.info("Обновлена lastUpdated в БД для ссылки:" + link.url());
                 sendUpdateToUsers(link);
+            } else {
+                LOGGER.info("Нет обновлений для ссылки " + link.url());
             }
         }
     }
@@ -68,13 +74,13 @@ public class ScrapperService {
         botNotifier.sendUpdate(new DTO.LinkUpdate(0,link.url(), "Новое обновление", chatIds));
     }
 
-    private Instant getLastUpdatedTime(String url) {
+    private OffsetDateTime getLastUpdatedTime(String url) {
         if (url.contains("github.com")) {
             return gitHubClient.getLastUpdated(url);
         } else if (url.contains("stackoverflow.com")) {
             return stackOverflowClient.getLastUpdated(extractQuestionId(url));
         }
-        return Instant.MIN; // если источник не поддерживается
+        return OffsetDateTime.MIN; // если источник не поддерживается
     }
 
     private String extractQuestionId(String url) {

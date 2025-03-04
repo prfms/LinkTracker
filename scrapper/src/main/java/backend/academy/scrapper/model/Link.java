@@ -3,7 +3,7 @@ package backend.academy.scrapper.model;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
-import java.time.Instant;
+import java.time.OffsetDateTime;
 import java.util.List;
 
 @Setter
@@ -15,5 +15,5 @@ public class Link {
     private Long chatId;
     private List<String> tags;
     private List<String> filters;
-    private Instant lastUpdated;
+    private OffsetDateTime lastUpdated;
 }
