@@ -1,16 +1,15 @@
 package backend.academy.scrapper;
 
-
 import backend.academy.DTO;
+import backend.academy.scrapper.clients.GitHubClient;
+import backend.academy.scrapper.clients.StackOverflowClient;
 import backend.academy.scrapper.model.Link;
 import backend.academy.scrapper.repository.Repository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.logging.Logger;
-import backend.academy.scrapper.clients.StackOverflowClient;
-import backend.academy.scrapper.clients.GitHubClient;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 @Service
 public class ScrapperService {
@@ -21,7 +20,11 @@ public class ScrapperService {
     private static final Logger LOGGER = Logger.getLogger(ScrapperService.class.getName());
 
     @Autowired
-    public ScrapperService(Repository repository, GitHubClient gitHubClient, StackOverflowClient stackOverflowClient, BotNotifier botNotifier) {
+    public ScrapperService(
+            Repository repository,
+            GitHubClient gitHubClient,
+            StackOverflowClient stackOverflowClient,
+            BotNotifier botNotifier) {
         this.repository = repository;
         this.gitHubClient = gitHubClient;
         this.stackOverflowClient = stackOverflowClient;
@@ -39,9 +42,8 @@ public class ScrapperService {
     public List<DTO.LinkResponse> getLinks(Long chatId) {
         List<Link> links = repository.getLinks(chatId);
         return links.stream()
-            .map(link -> new DTO.LinkResponse(
-                link.id(), link.url(), link.tags(), link.filters()))
-            .toList();
+                .map(link -> new DTO.LinkResponse(link.id(), link.url(), link.tags(), link.filters()))
+                .toList();
     }
 
     public int addLink(Long chatId, DTO.AddLinkRequest link) {
@@ -57,7 +59,8 @@ public class ScrapperService {
         LOGGER.info("Проверка " + links.size() + " ссылок на обновления");
         for (Link link : links) {
             OffsetDateTime newLastUpdated = getLastUpdatedTime(link.url());
-            LOGGER.info("Ссылка: " + link.url() + " | Старый lastUpdated: " + link.lastUpdated() + " | Новый lastUpdated: " + newLastUpdated);
+            LOGGER.info("Ссылка: " + link.url() + " | Старый lastUpdated: " + link.lastUpdated()
+                    + " | Новый lastUpdated: " + newLastUpdated);
 
             if (newLastUpdated != null && newLastUpdated.isAfter(link.lastUpdated())) {
                 repository.updateLastChecked(link, newLastUpdated);
@@ -71,7 +74,7 @@ public class ScrapperService {
 
     private void sendUpdateToUsers(Link link) {
         List<Long> chatIds = repository.findUsersTrackingLink(link.id());
-        botNotifier.sendUpdate(new DTO.LinkUpdate(0,link.url(), "Новое обновление", chatIds));
+        botNotifier.sendUpdate(new DTO.LinkUpdate(0, link.url(), "Новое обновление", chatIds));
     }
 
     private OffsetDateTime getLastUpdatedTime(String url) {

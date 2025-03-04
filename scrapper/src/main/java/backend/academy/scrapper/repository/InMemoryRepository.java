@@ -1,7 +1,6 @@
 package backend.academy.scrapper.repository;
 
 import backend.academy.scrapper.model.Link;
-import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -20,7 +19,10 @@ public class InMemoryRepository implements Repository {
     public int addLink(String url, long chatId, List<String> tags, List<String> filters, OffsetDateTime lastUpdated) {
         for (int i = 0; i < trackedLinks.size(); i++) {
             Link link = trackedLinks.get(i);
-            if (link.url().equals(url) && link.chatId() == chatId && link.tags().equals(tags) && link.filters().equals(filters)) {
+            if (link.url().equals(url)
+                    && link.chatId() == chatId
+                    && link.tags().equals(tags)
+                    && link.filters().equals(filters)) {
                 return i;
             }
         }

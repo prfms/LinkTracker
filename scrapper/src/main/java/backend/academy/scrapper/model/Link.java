@@ -1,10 +1,10 @@
 package backend.academy.scrapper.model;
 
+import java.time.OffsetDateTime;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
-import java.time.OffsetDateTime;
-import java.util.List;
 
 @Setter
 @Getter

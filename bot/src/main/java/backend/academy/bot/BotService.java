@@ -4,17 +4,17 @@ import backend.academy.DTO;
 import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.UpdatesListener;
 import com.pengrad.telegrambot.model.BotCommand;
-import com.pengrad.telegrambot.model.Update;
 import com.pengrad.telegrambot.model.Message;
+import com.pengrad.telegrambot.model.Update;
 import com.pengrad.telegrambot.request.GetMyCommands;
 import com.pengrad.telegrambot.request.SendMessage;
 import com.pengrad.telegrambot.request.SetMyCommands;
 import jakarta.annotation.PostConstruct;
-import org.springframework.stereotype.Service;
-import org.springframework.beans.factory.annotation.Autowired;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 @Service
 public class BotService {
@@ -31,12 +31,11 @@ public class BotService {
     @PostConstruct
     public void init() {
         bot.execute(new SetMyCommands(
-            new BotCommand("/start", "Запуск бота"),
-            new BotCommand("/track", "Добавить ссылку для отслеживания"),
-            new BotCommand("/untrack", "Удалить ссылку из отслеживания"),
-            new BotCommand("/list", "Показать отслеживаемые ссылки"),
-            new BotCommand("/help", "Получить помощь по командам")
-        ));
+                new BotCommand("/start", "Запуск бота"),
+                new BotCommand("/track", "Добавить ссылку для отслеживания"),
+                new BotCommand("/untrack", "Удалить ссылку из отслеживания"),
+                new BotCommand("/list", "Показать отслеживаемые ссылки"),
+                new BotCommand("/help", "Получить помощь по командам")));
         bot.setUpdatesListener(updates -> {
             for (Update update : updates) {
                 if (update.message() != null) {
@@ -74,9 +73,10 @@ public class BotService {
                 if (links.isEmpty()) {
                     sendMessage(chatId, "У вас нет отслеживаемых ссылок.");
                 } else {
-                    String response = "Отслеживаемые ссылки:\n" + links.stream()
-                        .map(link -> link.url() + " (Теги: " + String.join(", ", link.tags()) + ")")
-                        .reduce("", (a, b) -> a + "\n" + b);
+                    String response = "Отслеживаемые ссылки:\n"
+                            + links.stream()
+                                    .map(link -> link.url() + " (Теги: " + String.join(", ", link.tags()) + ")")
+                                    .reduce("", (a, b) -> a + "\n" + b);
                     sendMessage(chatId, response);
                 }
                 break;
@@ -91,7 +91,12 @@ public class BotService {
                 if (commands != null && commands.length > 0) {
                     StringBuilder helpMessage = new StringBuilder("Доступные команды:\n");
                     for (BotCommand command : commands) {
-                        helpMessage.append("/").append(command.command()).append(" - ").append(command.description()).append("\n");
+                        helpMessage
+                                .append("/")
+                                .append(command.command())
+                                .append(" - ")
+                                .append(command.description())
+                                .append("\n");
                     }
                     sendMessage(chatId, helpMessage.toString());
                 } else {
@@ -132,7 +137,8 @@ public class BotService {
 
             case AWAITING_LINK_UNTRACK:
                 state.link = text;
-                scrapperClient.deleteLink(chatId, new DTO.RemoveLinkRequest(state.link));  // Вызываем метод для удаления ссылки
+                scrapperClient.deleteLink(
+                        chatId, new DTO.RemoveLinkRequest(state.link)); // Вызываем метод для удаления ссылки
                 sendMessage(chatId, "Ссылка успешно удалена из отслеживания!");
                 userStates.remove(chatId);
                 break;
