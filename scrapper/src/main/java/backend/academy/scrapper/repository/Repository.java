@@ -9,11 +9,11 @@ public interface Repository {
 
     int addLink(String url, long chatId, List<String> tags, List<String> filters, OffsetDateTime lastUpdated);
 
-    Link removeLink(String url);
+    Link removeLink(String url, long chatId);
 
-    List<Link> getLinks(Long chatId);
+    List<Link> getLinks(long chatId);
 
-    boolean containsLink(Link link);
+    boolean containsLink(String url);
 
     List<Link> getAllLinks();
 
@@ -22,4 +22,6 @@ public interface Repository {
     void updateLastChecked(Link url, OffsetDateTime lastUpdated);
 
     List<Long> findUsersTrackingLink(int id);
+
+    boolean ifUserExists(long id);
 }

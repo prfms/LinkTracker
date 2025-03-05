@@ -46,8 +46,8 @@ public class BotService {
         });
     }
 
-    public void sendUpdate(Long chatId, String text) {
-        bot.execute(new SendMessage(chatId, "Обнаружены изменения" + text));
+    public void sendUpdate(Long chatId, String url) {
+        bot.execute(new SendMessage(chatId, "Обнаружены изменения по ссылке " + url));
     }
 
     private void handleMessage(Message message) {
@@ -69,12 +69,12 @@ public class BotService {
                 sendMessage(chatId, "Введите ссылку, которую хотите отслеживать:");
                 break;
             case "/list":
-                List<DTO.LinkResponse> links = scrapperClient.getLinks(chatId);
-                if (links.isEmpty()) {
+                DTO.ListLinksResponse listLinks = scrapperClient.getLinks(chatId);
+                if (listLinks.size() == 0) {
                     sendMessage(chatId, "У вас нет отслеживаемых ссылок.");
                 } else {
                     String response = "Отслеживаемые ссылки:\n"
-                            + links.stream()
+                            + listLinks.links().stream()
                                     .map(link -> link.url() + " (Теги: " + String.join(", ", link.tags()) + ")")
                                     .reduce("", (a, b) -> a + "\n" + b);
                     sendMessage(chatId, response);
@@ -137,8 +137,7 @@ public class BotService {
 
             case AWAITING_LINK_UNTRACK:
                 state.link = text;
-                scrapperClient.deleteLink(
-                        chatId, new DTO.RemoveLinkRequest(state.link)); // Вызываем метод для удаления ссылки
+                scrapperClient.deleteLink(chatId, new DTO.RemoveLinkRequest(state.link));
                 sendMessage(chatId, "Ссылка успешно удалена из отслеживания!");
                 userStates.remove(chatId);
                 break;

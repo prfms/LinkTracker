@@ -33,7 +33,7 @@ public class InMemoryRepository implements Repository {
     }
 
     @Override
-    public Link removeLink(String url) {
+    public Link removeLink(String url, long chatId) {
         for (Link link : trackedLinks) {
             if (link.url().equals(url)) {
                 trackedLinks.remove(link);
@@ -44,13 +44,18 @@ public class InMemoryRepository implements Repository {
     }
 
     @Override
-    public List<Link> getLinks(Long chatId) {
+    public List<Link> getLinks(long chatId) {
         return new ArrayList<>(trackedLinks);
     }
 
     @Override
-    public boolean containsLink(Link link) {
-        return trackedLinks.contains(link);
+    public boolean containsLink(String url) {
+        for (Link link : trackedLinks) {
+            if (link.url().equals(url)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override
@@ -72,5 +77,10 @@ public class InMemoryRepository implements Repository {
     @Override
     public List<Long> findUsersTrackingLink(int id) {
         return List.of(userId);
+    }
+
+    @Override
+    public boolean ifUserExists(long id) {
+        return id == userId;
     }
 }

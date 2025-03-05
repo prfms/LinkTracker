@@ -3,6 +3,7 @@ package backend.academy.scrapper;
 import backend.academy.DTO;
 import backend.academy.scrapper.clients.GitHubClient;
 import backend.academy.scrapper.clients.StackOverflowClient;
+import backend.academy.scrapper.exception.NotFoundException;
 import backend.academy.scrapper.model.Link;
 import backend.academy.scrapper.repository.Repository;
 import java.time.OffsetDateTime;
@@ -39,19 +40,28 @@ public class ScrapperService {
         return repository.deleteUser(chatId);
     }
 
-    public List<DTO.LinkResponse> getLinks(Long chatId) {
-        List<Link> links = repository.getLinks(chatId);
-        return links.stream()
-                .map(link -> new DTO.LinkResponse(link.id(), link.url(), link.tags(), link.filters()))
-                .toList();
+    public List<DTO.LinkResponse> getLinks(long chatId) {
+        if (repository.ifUserExists(chatId)) {
+
+            List<Link> links = repository.getLinks(chatId);
+            return links.stream()
+                    .map(link -> new DTO.LinkResponse(link.id(), link.url(), link.tags(), link.filters()))
+                    .toList();
+        } else {
+            throw new NotFoundException("Пользователь с ID " + chatId + " не найден.");
+        }
     }
 
-    public int addLink(Long chatId, DTO.AddLinkRequest link) {
+    public int addLink(long chatId, DTO.AddLinkRequest link) {
         return repository.addLink(link.link(), chatId, link.tags(), link.filters(), getLastUpdatedTime(link.link()));
     }
 
-    public Link deleteLink(Long chatId, DTO.RemoveLinkRequest link) {
-        return repository.removeLink(link.link());
+    public Link deleteLink(long chatId, DTO.RemoveLinkRequest link) {
+        if (repository.containsLink(link.link())) {
+            return repository.removeLink(link.link(), chatId);
+        } else {
+            throw new NotFoundException("Ссылка " + link.link() + " у пользователя " + chatId + " не найдена.");
+        }
     }
 
     public void checkAndUpdateLinks() {
@@ -83,7 +93,7 @@ public class ScrapperService {
         } else if (url.contains("stackoverflow.com")) {
             return stackOverflowClient.getLastUpdated(extractQuestionId(url));
         }
-        return OffsetDateTime.MIN; // если источник не поддерживается
+        return OffsetDateTime.MIN;
     }
 
     private String extractQuestionId(String url) {

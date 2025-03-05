@@ -1,7 +1,6 @@
 package backend.academy.bot;
 
 import backend.academy.DTO;
-import java.util.List;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Service;
@@ -16,11 +15,7 @@ public class ScrapperClient {
     }
 
     public DTO.User registerUser(Long id) {
-        return restClient
-                .post()
-                .uri("tg-chat/{id}", id) // Указываем путь с параметром id
-                .retrieve()
-                .body(DTO.User.class); // Преобразуем ответ в DTO.User
+        return restClient.post().uri("tg-chat/{id}", id).retrieve().body(DTO.User.class);
     }
 
     public DTO.User deleteUser(Long id) {
@@ -32,7 +27,7 @@ public class ScrapperClient {
                 .body(DTO.User.class);
     }
 
-    public List<DTO.LinkResponse> getLinks(Long chatId) {
+    public DTO.ListLinksResponse getLinks(Long chatId) {
         return restClient
                 .get()
                 .uri("/links")
@@ -53,10 +48,10 @@ public class ScrapperClient {
 
     public DTO.LinkResponse deleteLink(Long chatId, DTO.RemoveLinkRequest linkRequest) {
         return restClient
-                .method(HttpMethod.DELETE) // Используем метод DELETE явно
+                .method(HttpMethod.DELETE)
                 .uri("/links")
                 .header("Tg-Chat-Id", String.valueOf(chatId))
-                .body(linkRequest) // Используем bodyValue() вместо body()
+                .body(linkRequest)
                 .retrieve()
                 .body(DTO.LinkResponse.class);
     }
