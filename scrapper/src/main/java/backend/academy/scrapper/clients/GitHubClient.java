@@ -2,15 +2,22 @@ package backend.academy.scrapper.clients;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.time.OffsetDateTime;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
 @Service
-public class GitHubClient {
+public class GitHubClient implements LinkUpdateClient {
     private final WebClient webClient;
 
-    public GitHubClient(WebClient.Builder webClientBuilder) {
-        this.webClient = webClientBuilder.baseUrl("https://api.github.com").build();
+    @Value("${app.github-base-url:https://api.github.com}")
+    private String githubBaseUrl = "https://api.github.com";
+
+    public GitHubClient(WebClient.Builder webClientBuilder, @Value("${app.github-token}") String githubToken) {
+        this.webClient = webClientBuilder.baseUrl(githubBaseUrl)
+            .defaultHeader(HttpHeaders.AUTHORIZATION, "token " + githubToken)
+            .build();
     }
 
     public OffsetDateTime getLastUpdated(String url) {
