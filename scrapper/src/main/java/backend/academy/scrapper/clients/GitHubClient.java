@@ -15,9 +15,10 @@ public class GitHubClient implements LinkUpdateClient {
     private String githubBaseUrl = "https://api.github.com";
 
     public GitHubClient(WebClient.Builder webClientBuilder, @Value("${app.github-token}") String githubToken) {
-        this.webClient = webClientBuilder.baseUrl(githubBaseUrl)
-            .defaultHeader(HttpHeaders.AUTHORIZATION, "token " + githubToken)
-            .build();
+        this.webClient = webClientBuilder
+                .baseUrl(githubBaseUrl)
+                .defaultHeader(HttpHeaders.AUTHORIZATION, "token " + githubToken)
+                .build();
     }
 
     public OffsetDateTime getLastUpdated(String url) {
