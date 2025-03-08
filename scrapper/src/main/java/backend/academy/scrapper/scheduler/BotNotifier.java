@@ -1,4 +1,4 @@
-package backend.academy.scrapper;
+package backend.academy.scrapper.scheduler;
 
 import backend.academy.DTO;
 import java.util.logging.Logger;

@@ -1,6 +1,8 @@
-package backend.academy.bot;
+package backend.academy.bot.service;
 
 import backend.academy.DTO;
+import backend.academy.bot.BotConfig;
+import backend.academy.bot.client.ScrapperClient;
 import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.UpdatesListener;
 import com.pengrad.telegrambot.model.BotCommand;

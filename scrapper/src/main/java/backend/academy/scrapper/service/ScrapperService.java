@@ -1,4 +1,4 @@
-package backend.academy.scrapper;
+package backend.academy.scrapper.service;
 
 import backend.academy.DTO;
 import backend.academy.scrapper.clients.GitHubClient;
@@ -9,6 +9,7 @@ import backend.academy.scrapper.repository.Repository;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.logging.Logger;
+import backend.academy.scrapper.scheduler.BotNotifier;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

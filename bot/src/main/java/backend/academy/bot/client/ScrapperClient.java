@@ -1,4 +1,4 @@
-package backend.academy.bot;
+package backend.academy.bot.client;
 
 import backend.academy.DTO;
 import org.springframework.core.ParameterizedTypeReference;

@@ -1,4 +1,4 @@
-package backend.academy.scrapper;
+package backend.academy.scrapper.controller;
 
 import backend.academy.DTO;
 import backend.academy.scrapper.exception.NotFoundException;

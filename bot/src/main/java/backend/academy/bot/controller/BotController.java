@@ -1,8 +1,9 @@
-package backend.academy.bot;
+package backend.academy.bot.controller;
 
 import backend.academy.DTO;
 import java.util.List;
 import java.util.logging.Logger;
+import backend.academy.bot.service.BotService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;

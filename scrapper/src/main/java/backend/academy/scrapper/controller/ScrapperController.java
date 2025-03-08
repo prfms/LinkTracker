@@ -1,6 +1,7 @@
-package backend.academy.scrapper;
+package backend.academy.scrapper.controller;
 
 import backend.academy.DTO;
+import backend.academy.scrapper.service.ScrapperService;
 import backend.academy.scrapper.model.Link;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;

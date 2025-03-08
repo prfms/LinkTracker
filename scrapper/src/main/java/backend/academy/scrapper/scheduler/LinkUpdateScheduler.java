@@ -1,5 +1,6 @@
-package backend.academy.scrapper;
+package backend.academy.scrapper.scheduler;
 
+import backend.academy.scrapper.service.ScrapperService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
