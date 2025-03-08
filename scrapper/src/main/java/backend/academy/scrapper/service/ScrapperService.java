@@ -6,10 +6,10 @@ import backend.academy.scrapper.clients.StackOverflowClient;
 import backend.academy.scrapper.exception.NotFoundException;
 import backend.academy.scrapper.model.Link;
 import backend.academy.scrapper.repository.Repository;
+import backend.academy.scrapper.scheduler.BotNotifier;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.logging.Logger;
-import backend.academy.scrapper.scheduler.BotNotifier;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

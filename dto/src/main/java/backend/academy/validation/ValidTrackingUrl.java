@@ -10,6 +10,8 @@ import java.lang.annotation.*;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface ValidTrackingUrl {
     String message() default "Поддерживаются только ссылки на GitHub и Stack Overflow";
+
     Class<?>[] groups() default {};
+
     Class<? extends Payload>[] payload() default {};
 }

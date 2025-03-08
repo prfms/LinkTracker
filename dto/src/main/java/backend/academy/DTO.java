@@ -15,16 +15,14 @@ public class DTO {
             String description, String code, String exceptionName, String exceptionMessage, List<String> stacktrace) {}
 
     public record AddLinkRequest(
-            @NotNull
-            @NotBlank(message = "Ссылка не может быть пустой")
-            @ValidTrackingUrl
-            String link,
+            @NotNull @NotBlank(message = "Ссылка не может быть пустой") @ValidTrackingUrl String link,
             List<String> tags,
             List<String> filters) {}
 
     public record ListLinksResponse(List<LinkResponse> links, Integer size) {}
 
-    public record RemoveLinkRequest(@NotNull @NotBlank(message = "Ссылка не может быть пустой") @ValidTrackingUrl String link) {}
+    public record RemoveLinkRequest(
+            @NotNull @NotBlank(message = "Ссылка не может быть пустой") @ValidTrackingUrl String link) {}
 
     public record LinkUpdate(int id, String url, String description, List<Long> tgChatIds) {}
 }
