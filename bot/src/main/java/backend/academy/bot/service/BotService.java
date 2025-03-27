@@ -15,6 +15,8 @@ import jakarta.annotation.PostConstruct;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
+import lombok.Getter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -22,6 +24,7 @@ import org.springframework.stereotype.Service;
 public class BotService {
     private final TelegramBot bot;
     private final ScrapperClient scrapperClient;
+    @Getter
     private final Map<Long, BotState> userStates = new HashMap<>();
 
     @Autowired
@@ -52,7 +55,7 @@ public class BotService {
         bot.execute(new SendMessage(chatId, "Обнаружены изменения по ссылке " + url));
     }
 
-    private void handleMessage(Message message) {
+    public void handleMessage(Message message) {
         long chatId = message.chat().id();
         String text = message.text();
 
@@ -115,9 +118,13 @@ public class BotService {
 
         switch (state.step) {
             case AWAITING_LINK_TRACK:
-                state.link = text;
-                state.step = BotStep.AWAITING_TAGS;
-                sendMessage(chatId, "Введите теги через пробел (или пропустите, отправив /skip):");
+                if (isValidLink(text)) {
+                    state.link = text;
+                    state.step = BotStep.AWAITING_TAGS;
+                    sendMessage(chatId, "Введите теги через пробел (или пропустите, отправив /skip):");
+                } else {
+                    sendMessage(chatId, "Некорректный формат ссылки. Поддерживаются ссылки с GitHub и StackOverFlow.");
+                }
                 break;
 
             case AWAITING_TAGS:
@@ -146,12 +153,20 @@ public class BotService {
         }
     }
 
+    private boolean isValidLink(String link) {
+        return Pattern.matches("^https:\\/\\/stackoverflow\\.com\\/questions\\/\\d+\\/?", link)
+            || Pattern.matches("https:\\/\\/github\\.com\\/[(a-zA-Z0-9_]+\\/[(a-zA-Z0-9_-]+\\/?", link);
+    }
+
     private void sendMessage(long chatId, String text) {
         bot.execute(new SendMessage(chatId, text));
     }
 
-    private static class BotState {
+    @Getter
+    public static class BotState {
+        @Getter
         private BotStep step;
+        @Getter
         private String link;
         private List<String> tags = List.of();
         private List<String> filters = List.of();
@@ -161,7 +176,7 @@ public class BotService {
         }
     }
 
-    private enum BotStep {
+    public enum BotStep {
         AWAITING_LINK_TRACK,
         AWAITING_TAGS,
         AWAITING_FILTERS,
