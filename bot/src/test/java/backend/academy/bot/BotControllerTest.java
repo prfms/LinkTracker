@@ -5,7 +5,7 @@ import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import backend.academy.DTO;
+import backend.academy.bot.client.dto.LinkUpdateDto;
 import backend.academy.bot.controller.BotController;
 import backend.academy.bot.service.BotService;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -34,7 +34,7 @@ public class BotControllerTest {
     @Test
     void updates_ShouldCallSendUpdate_ForEachUser() throws Exception {
         // Arrange
-        DTO.LinkUpdate update = new DTO.LinkUpdate(
+        LinkUpdateDto update = new LinkUpdateDto(
                 0, "https://github.com/example/repo", "Обновление в репозитории", List.of(123L, 456L));
 
         // Act

@@ -1,7 +1,7 @@
 package backend.academy.scrapper.scheduler;
 
-import backend.academy.DTO;
 import java.util.logging.Logger;
+import backend.academy.scrapper.controller.dto.LinkUpdateDto;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
 
@@ -14,10 +14,10 @@ public class BotNotifier {
         this.restClient = RestClient.create("http://localhost:8080/api/bot/");
     }
 
-    public DTO.LinkUpdate sendUpdate(DTO.LinkUpdate update) {
+    public LinkUpdateDto sendUpdate(LinkUpdateDto update) {
         LOGGER.info("Отправка сообщения в бота: " + update);
         try {
-            return restClient.post().uri("/updates").body(update).retrieve().body(DTO.LinkUpdate.class);
+            return restClient.post().uri("/updates").body(update).retrieve().body(LinkUpdateDto.class);
         } catch (Exception e) {
             LOGGER.warning("Ошибка при отправке запроса в бота: " + e.getMessage());
             return null;

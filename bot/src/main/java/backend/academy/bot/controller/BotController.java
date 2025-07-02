@@ -1,6 +1,6 @@
 package backend.academy.bot.controller;
 
-import backend.academy.DTO;
+import backend.academy.bot.client.dto.LinkUpdateDto;
 import backend.academy.bot.service.BotService;
 import java.util.List;
 import java.util.logging.Logger;
@@ -22,7 +22,7 @@ public class BotController {
     }
 
     @PostMapping("/updates")
-    public void updates(@RequestBody DTO.LinkUpdate linkUpdate) {
+    public void updates(@RequestBody LinkUpdateDto linkUpdate) {
         LOGGER.info("Получено обновление для отправки пользователям: " + linkUpdate);
         List<Long> tgIds = linkUpdate.tgChatIds();
         for (long id : tgIds) {

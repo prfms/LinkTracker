@@ -1,4 +1,4 @@
-package backend.academy.validation;
+package backend.academy.bot.validation;
 
 import jakarta.validation.Constraint;
 import jakarta.validation.Payload;

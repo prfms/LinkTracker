@@ -1,8 +1,10 @@
 package backend.academy.bot.service;
 
-import backend.academy.DTO;
 import backend.academy.bot.BotConfig;
 import backend.academy.bot.client.ScrapperClient;
+import backend.academy.bot.client.dto.AddLinkRequestDto;
+import backend.academy.bot.client.dto.ListLinksResponseDto;
+import backend.academy.bot.client.dto.RemoveLinkRequestDto;
 import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.UpdatesListener;
 import com.pengrad.telegrambot.model.BotCommand;
@@ -74,7 +76,7 @@ public class BotService {
                 sendMessage(chatId, "Введите ссылку, которую хотите отслеживать:");
                 break;
             case "/list":
-                DTO.ListLinksResponse listLinks = scrapperClient.getLinks(chatId);
+                ListLinksResponseDto listLinks = scrapperClient.getLinks(chatId);
                 if (listLinks.size() == 0) {
                     sendMessage(chatId, "У вас нет отслеживаемых ссылок.");
                 } else {
@@ -139,14 +141,14 @@ public class BotService {
                 if (!text.equals("/skip")) {
                     state.filters = List.of(text.split(" "));
                 }
-                scrapperClient.addLink(chatId, new DTO.AddLinkRequest(state.link, state.tags, state.filters));
+                scrapperClient.addLink(chatId, new AddLinkRequestDto(state.link, state.tags, state.filters));
                 sendMessage(chatId, "Ссылка успешно добавлена!");
                 userStates.remove(chatId);
                 break;
 
             case AWAITING_LINK_UNTRACK:
                 state.link = text;
-                scrapperClient.deleteLink(chatId, new DTO.RemoveLinkRequest(state.link));
+                scrapperClient.deleteLink(chatId, new RemoveLinkRequestDto(state.link));
                 sendMessage(chatId, "Ссылка успешно удалена из отслеживания!");
                 userStates.remove(chatId);
                 break;

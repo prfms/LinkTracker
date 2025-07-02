@@ -1,7 +1,10 @@
 package backend.academy.bot.client;
 
-import backend.academy.DTO;
-import org.springframework.core.ParameterizedTypeReference;
+import backend.academy.bot.client.dto.AddLinkRequestDto;
+import backend.academy.bot.client.dto.LinkResponseDto;
+import backend.academy.bot.client.dto.ListLinksResponseDto;
+import backend.academy.bot.client.dto.RemoveLinkRequestDto;
+import backend.academy.bot.client.dto.UserDto;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
@@ -14,45 +17,45 @@ public class ScrapperClient {
         this.restClient = RestClient.create("http://localhost:8081/api/scrapper/");
     }
 
-    public DTO.User registerUser(Long id) {
-        return restClient.post().uri("tg-chat/{id}", id).retrieve().body(DTO.User.class);
+    public UserDto registerUser(Long id) {
+        return restClient.post().uri("tg-chat/{id}", id).retrieve().body(UserDto.class);
     }
 
-    public DTO.User deleteUser(Long id) {
+    public UserDto deleteUser(Long id) {
         return restClient
                 .delete()
                 .uri(uriBuilder ->
                         uriBuilder.path("/tg-chat/{id}").queryParam("id", id).build(id))
                 .retrieve()
-                .body(DTO.User.class);
+                .body(UserDto.class);
     }
 
-    public DTO.ListLinksResponse getLinks(Long chatId) {
+    public ListLinksResponseDto getLinks(Long chatId) {
         return restClient
                 .get()
                 .uri("/links")
                 .header("Tg-Chat-Id", String.valueOf(chatId))
                 .retrieve()
-                .body(new ParameterizedTypeReference<>() {});
+                .body(ListLinksResponseDto.class);
     }
 
-    public DTO.LinkResponse addLink(Long chatId, DTO.AddLinkRequest linkRequest) {
+    public LinkResponseDto addLink(Long chatId, AddLinkRequestDto linkRequest) {
         return restClient
                 .post()
                 .uri("/links")
                 .header("Tg-Chat-Id", String.valueOf(chatId))
                 .body(linkRequest)
                 .retrieve()
-                .body(DTO.LinkResponse.class);
+                .body(LinkResponseDto.class);
     }
 
-    public DTO.LinkResponse deleteLink(Long chatId, DTO.RemoveLinkRequest linkRequest) {
+    public LinkResponseDto deleteLink(Long chatId, RemoveLinkRequestDto linkRequest) {
         return restClient
                 .method(HttpMethod.DELETE)
                 .uri("/links")
                 .header("Tg-Chat-Id", String.valueOf(chatId))
                 .body(linkRequest)
                 .retrieve()
-                .body(DTO.LinkResponse.class);
+                .body(LinkResponseDto.class);
     }
 }

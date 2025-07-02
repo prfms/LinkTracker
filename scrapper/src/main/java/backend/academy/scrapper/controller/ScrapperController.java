@@ -1,6 +1,10 @@
 package backend.academy.scrapper.controller;
 
-import backend.academy.DTO;
+import backend.academy.scrapper.controller.dto.AddLinkRequestDto;
+import backend.academy.scrapper.controller.dto.LinkResponseDto;
+import backend.academy.scrapper.controller.dto.ListLinksResponseDto;
+import backend.academy.scrapper.controller.dto.RemoveLinkRequestDto;
+import backend.academy.scrapper.controller.dto.UserDto;
 import backend.academy.scrapper.model.Link;
 import backend.academy.scrapper.service.ScrapperService;
 import jakarta.validation.Valid;
@@ -29,40 +33,40 @@ public class ScrapperController {
     }
 
     @PostMapping("/tg-chat/{id}")
-    public DTO.User registerUser(@PathVariable @Min(1) long id) {
+    public UserDto registerUser(@PathVariable @Min(1) long id) {
         long userId = scrapperService.registerUser(id);
-        return new DTO.User(userId);
+        return new UserDto(userId);
     }
 
     @DeleteMapping("/tg-chat/{id}")
-    public DTO.User deleteUser(@PathVariable @Min(1) long id) {
+    public UserDto deleteUser(@PathVariable @Min(1) long id) {
         long userId = scrapperService.deleteUser(id);
-        return new DTO.User(userId);
+        return new UserDto(userId);
     }
 
     @GetMapping("/links")
-    public ResponseEntity<DTO.ListLinksResponse> getLinks(@RequestHeader("Tg-Chat-Id") @Min(1) long chatId) {
-        List<DTO.LinkResponse> links = scrapperService.getLinks(chatId).stream()
-                .map(link -> new DTO.LinkResponse(link.id(), link.url(), link.tags(), link.filters()))
+    public ResponseEntity<ListLinksResponseDto> getLinks(@RequestHeader("Tg-Chat-Id") @Min(1) long chatId) {
+        List<LinkResponseDto> links = scrapperService.getLinks(chatId).stream()
+                .map(link -> new LinkResponseDto(link.id(), link.url(), link.tags(), link.filters()))
                 .toList();
-        return ResponseEntity.ok(new DTO.ListLinksResponse(links, links.size()));
+        return ResponseEntity.ok(new ListLinksResponseDto(links, links.size()));
     }
 
     @PostMapping("/links")
-    public ResponseEntity<DTO.LinkResponse> addLink(
-            @RequestHeader("Tg-Chat-Id") @Min(1) long chatId, @Valid @RequestBody DTO.AddLinkRequest link) {
+    public ResponseEntity<LinkResponseDto> addLink(
+            @RequestHeader("Tg-Chat-Id") @Min(1) long chatId, @Valid @RequestBody AddLinkRequestDto link) {
         int id = scrapperService.addLink(chatId, link);
-        return ResponseEntity.ok(new DTO.LinkResponse(id, link.link(), link.tags(), link.filters()));
+        return ResponseEntity.ok(new LinkResponseDto(id, link.link(), link.tags(), link.filters()));
     }
 
     @DeleteMapping("/links")
-    public ResponseEntity<DTO.LinkResponse> deleteLink(
-            @RequestHeader("Tg-Chat-Id") @Min(1) long chatId, @Valid @RequestBody DTO.RemoveLinkRequest link) {
+    public ResponseEntity<LinkResponseDto> deleteLink(
+            @RequestHeader("Tg-Chat-Id") @Min(1) long chatId, @Valid @RequestBody RemoveLinkRequestDto link) {
         Link responseLink = scrapperService.deleteLink(chatId, link);
         if (responseLink == null) {
             throw new NoSuchElementException("Ссылка должна быть добавлена перед удалением");
         }
-        return ResponseEntity.ok(new DTO.LinkResponse(
+        return ResponseEntity.ok(new LinkResponseDto(
                 responseLink.id(), responseLink.url(), responseLink.tags(), responseLink.filters()));
     }
 }

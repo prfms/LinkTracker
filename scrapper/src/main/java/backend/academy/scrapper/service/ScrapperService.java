@@ -1,12 +1,15 @@
 package backend.academy.scrapper.service;
 
-import backend.academy.DTO;
 import backend.academy.scrapper.clients.GitHubClient;
 import backend.academy.scrapper.clients.StackOverflowClient;
+import backend.academy.scrapper.controller.dto.AddLinkRequestDto;
+import backend.academy.scrapper.controller.dto.LinkUpdateDto;
+import backend.academy.scrapper.controller.dto.RemoveLinkRequestDto;
 import backend.academy.scrapper.exception.NotFoundException;
 import backend.academy.scrapper.model.Link;
 import backend.academy.scrapper.repository.Repository;
 import backend.academy.scrapper.scheduler.BotNotifier;
+import backend.academy.scrapper.controller.dto.LinkResponseDto;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.logging.Logger;
@@ -41,23 +44,23 @@ public class ScrapperService {
         return repository.deleteUser(chatId);
     }
 
-    public List<DTO.LinkResponse> getLinks(long chatId) {
+    public List<LinkResponseDto> getLinks(long chatId) {
         if (repository.ifUserExists(chatId)) {
 
             List<Link> links = repository.getLinks(chatId);
             return links.stream()
-                    .map(link -> new DTO.LinkResponse(link.id(), link.url(), link.tags(), link.filters()))
+                    .map(link -> new LinkResponseDto(link.id(), link.url(), link.tags(), link.filters()))
                     .toList();
         } else {
             throw new NotFoundException("Пользователь с ID " + chatId + " не найден.");
         }
     }
 
-    public int addLink(long chatId, DTO.AddLinkRequest link) {
+    public int addLink(long chatId, AddLinkRequestDto link) {
         return repository.addLink(link.link(), chatId, link.tags(), link.filters(), getLastUpdatedTime(link.link()));
     }
 
-    public Link deleteLink(long chatId, DTO.RemoveLinkRequest link) {
+    public Link deleteLink(long chatId, RemoveLinkRequestDto link) {
         if (repository.containsLink(link.link())) {
             return repository.removeLink(link.link(), chatId);
         } else {
@@ -85,7 +88,7 @@ public class ScrapperService {
 
     private void sendUpdateToUsers(Link link) {
         List<Long> chatIds = repository.findUsersTrackingLink(link.id());
-        botNotifier.sendUpdate(new DTO.LinkUpdate(0, link.url(), "Новое обновление", chatIds));
+        botNotifier.sendUpdate(new LinkUpdateDto(0, link.url(), "Новое обновление", chatIds));
     }
 
     private OffsetDateTime getLastUpdatedTime(String url) {
