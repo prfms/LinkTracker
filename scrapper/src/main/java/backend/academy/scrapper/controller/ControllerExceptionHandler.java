@@ -47,12 +47,12 @@ public class ControllerExceptionHandler {
                 "Некорректные параметры запроса", "400", "BadRequestException", "Ошибка валидации параметров", errors);
     }
 
-    @ExceptionHandler(Exception.class)
+    /*@ExceptionHandler(Exception.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ApiErrorResponseDto handleGenericException(Exception ex) {
         return new ApiErrorResponseDto(
                 "Внутренняя ошибка сервера", "500", "InternalServerException", ex.getMessage(), List.of());
-    }
+    }*/
 
     private List<String> getListStringStackTrace(Exception exception) {
         return Arrays.stream(exception.getStackTrace())

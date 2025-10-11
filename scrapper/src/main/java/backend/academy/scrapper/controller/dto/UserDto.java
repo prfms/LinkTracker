@@ -1,10 +1,4 @@
 package backend.academy.scrapper.controller.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
+public record UserDto(long id) {}
 
-@Data
-@AllArgsConstructor
-public class UserDto {
-    private long id;
-}

@@ -6,6 +6,7 @@ import backend.academy.bot.client.dto.ListLinksResponseDto;
 import backend.academy.bot.client.dto.RemoveLinkRequestDto;
 import backend.academy.bot.client.dto.UserDto;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
 
@@ -14,11 +15,21 @@ public class ScrapperClient {
     private final RestClient restClient;
 
     public ScrapperClient() {
-        this.restClient = RestClient.create("http://localhost:8081/api/scrapper/");
+        this.restClient = RestClient
+            .builder()
+            .baseUrl("http://localhost:8081/api/scrapper/")
+            .build();
+
     }
 
     public UserDto registerUser(Long id) {
-        return restClient.post().uri("tg-chat/{id}", id).retrieve().body(UserDto.class);
+        return restClient
+            .post()
+            .uri("tg-chat/{id}", id)
+            .contentType(MediaType.APPLICATION_JSON)
+            .accept(MediaType.APPLICATION_JSON)
+            .retrieve()
+            .body(UserDto.class);
     }
 
     public UserDto deleteUser(Long id) {
@@ -44,6 +55,7 @@ public class ScrapperClient {
                 .post()
                 .uri("/links")
                 .header("Tg-Chat-Id", String.valueOf(chatId))
+                .contentType(MediaType.APPLICATION_JSON)
                 .body(linkRequest)
                 .retrieve()
                 .body(LinkResponseDto.class);

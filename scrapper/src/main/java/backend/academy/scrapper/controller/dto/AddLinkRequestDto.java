@@ -4,15 +4,14 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.Getter;
 import java.util.List;
 
-@Data
-@AllArgsConstructor
-public class AddLinkRequestDto {
+public record AddLinkRequestDto (
     @NotNull
     @NotBlank(message = "Ссылка не может быть пустой")
     //@ValidTrackingUrl
-    private String link;
-    private List<String> tags;
-    private List<String> filters;
-}
+    String link,
+    List<String> tags,
+    List<String> filters
+) { }
