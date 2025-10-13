@@ -1,12 +1,12 @@
 package backend.academy.scrapper.repository;
 
-import backend.academy.scrapper.model.Link;
+import backend.academy.scrapper.model.LinkDto;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-public class InMemoryRepository implements Repository {
-    private final List<Link> trackedLinks = new ArrayList<>();
+public class InMemoryRepository implements CommonRepository {
+    private final List<LinkDto> trackedLinks = new ArrayList<>();
     private long userId;
 
     @Override
@@ -18,7 +18,7 @@ public class InMemoryRepository implements Repository {
     @Override
     public int addLink(String url, long chatId, List<String> tags, List<String> filters, OffsetDateTime lastUpdated) {
         for (int i = 0; i < trackedLinks.size(); i++) {
-            Link link = trackedLinks.get(i);
+            LinkDto link = trackedLinks.get(i);
             if (link.url().equals(url)
                     && link.chatId() == chatId
                     && link.tags().equals(tags)
@@ -27,14 +27,14 @@ public class InMemoryRepository implements Repository {
             }
         }
 
-        Link addedLink = new Link(trackedLinks.size(), url, chatId, tags, filters, lastUpdated);
+        LinkDto addedLink = new LinkDto(trackedLinks.size(), url, chatId, tags, filters, lastUpdated);
         trackedLinks.add(addedLink);
         return trackedLinks.size() - 1;
     }
 
     @Override
-    public Link removeLink(String url, long chatId) {
-        for (Link link : trackedLinks) {
+    public LinkDto removeLink(String url, long chatId) {
+        for (LinkDto link : trackedLinks) {
             if (link.url().equals(url)) {
                 trackedLinks.remove(link);
                 return link;
@@ -44,13 +44,13 @@ public class InMemoryRepository implements Repository {
     }
 
     @Override
-    public List<Link> getLinks(long chatId) {
+    public List<LinkDto> getLinks(long chatId) {
         return new ArrayList<>(trackedLinks);
     }
 
     @Override
     public boolean containsLink(String url) {
-        for (Link link : trackedLinks) {
+        for (LinkDto link : trackedLinks) {
             if (link.url().equals(url)) {
                 return true;
             }
@@ -59,7 +59,7 @@ public class InMemoryRepository implements Repository {
     }
 
     @Override
-    public List<Link> getAllLinks() {
+    public List<LinkDto> getAllLinks() {
         return trackedLinks;
     }
 
@@ -70,7 +70,7 @@ public class InMemoryRepository implements Repository {
     }
 
     @Override
-    public void updateLastChecked(Link link, OffsetDateTime lastUpdated) {
+    public void updateLastChecked(LinkDto link, OffsetDateTime lastUpdated) {
         link.lastUpdated(lastUpdated);
     }
 

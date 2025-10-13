@@ -5,7 +5,7 @@ import backend.academy.scrapper.controller.dto.LinkResponseDto;
 import backend.academy.scrapper.controller.dto.ListLinksResponseDto;
 import backend.academy.scrapper.controller.dto.RemoveLinkRequestDto;
 import backend.academy.scrapper.controller.dto.UserDto;
-import backend.academy.scrapper.model.Link;
+import backend.academy.scrapper.model.LinkDto;
 import backend.academy.scrapper.service.ScrapperService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
@@ -62,7 +62,7 @@ public class ScrapperController {
     @DeleteMapping("/links")
     public ResponseEntity<LinkResponseDto> deleteLink(
             @RequestHeader("Tg-Chat-Id") @Min(1) long chatId, @Valid @RequestBody RemoveLinkRequestDto link) {
-        Link responseLink = scrapperService.deleteLink(chatId, link);
+        LinkDto responseLink = scrapperService.deleteLink(chatId, link);
         if (responseLink == null) {
             throw new NoSuchElementException("Ссылка должна быть добавлена перед удалением");
         }

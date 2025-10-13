@@ -1,0 +1,16 @@
+package backend.academy.scrapper.model;
+
+import jakarta.persistence.*;
+import lombok.Data;
+import java.util.List;
+
+@Data
+@Entity
+@Table(name = "user")  // имя таблицы из миграции
+public class User {
+    @Id
+    private Long id;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Link> links;
+}

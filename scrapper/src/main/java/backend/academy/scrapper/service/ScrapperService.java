@@ -6,8 +6,8 @@ import backend.academy.scrapper.controller.dto.AddLinkRequestDto;
 import backend.academy.scrapper.controller.dto.LinkUpdateDto;
 import backend.academy.scrapper.controller.dto.RemoveLinkRequestDto;
 import backend.academy.scrapper.exception.NotFoundException;
-import backend.academy.scrapper.model.Link;
-import backend.academy.scrapper.repository.Repository;
+import backend.academy.scrapper.model.LinkDto;
+import backend.academy.scrapper.repository.CommonRepository;
 import backend.academy.scrapper.scheduler.BotNotifier;
 import backend.academy.scrapper.controller.dto.LinkResponseDto;
 import java.time.OffsetDateTime;
@@ -18,7 +18,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class ScrapperService {
-    private final Repository repository;
+    private final CommonRepository repository;
     private final GitHubClient gitHubClient;
     private final StackOverflowClient stackOverflowClient;
     private final BotNotifier botNotifier;
@@ -26,7 +26,7 @@ public class ScrapperService {
 
     @Autowired
     public ScrapperService(
-            Repository repository,
+            CommonRepository repository,
             GitHubClient gitHubClient,
             StackOverflowClient stackOverflowClient,
             BotNotifier botNotifier) {
@@ -47,7 +47,7 @@ public class ScrapperService {
     public List<LinkResponseDto> getLinks(long chatId) {
         if (repository.ifUserExists(chatId)) {
 
-            List<Link> links = repository.getLinks(chatId);
+            List<LinkDto> links = repository.getLinks(chatId);
             return links.stream()
                     .map(link -> new LinkResponseDto(link.id(), link.url(), link.tags(), link.filters()))
                     .toList();
@@ -60,7 +60,7 @@ public class ScrapperService {
         return repository.addLink(link.link(), chatId, link.tags(), link.filters(), getLastUpdatedTime(link.link()));
     }
 
-    public Link deleteLink(long chatId, RemoveLinkRequestDto link) {
+    public LinkDto deleteLink(long chatId, RemoveLinkRequestDto link) {
         if (repository.containsLink(link.link())) {
             return repository.removeLink(link.link(), chatId);
         } else {
@@ -69,9 +69,9 @@ public class ScrapperService {
     }
 
     public void checkAndUpdateLinks() {
-        List<Link> links = repository.getAllLinks();
+        List<LinkDto> links = repository.getAllLinks();
         LOGGER.info("Проверка " + links.size() + " ссылок на обновления");
-        for (Link link : links) {
+        for (LinkDto link : links) {
             OffsetDateTime newLastUpdated = getLastUpdatedTime(link.url());
             LOGGER.info("Ссылка: " + link.url() + " | Старый lastUpdated: " + link.lastUpdated()
                     + " | Новый lastUpdated: " + newLastUpdated);
@@ -86,7 +86,7 @@ public class ScrapperService {
         }
     }
 
-    private void sendUpdateToUsers(Link link) {
+    private void sendUpdateToUsers(LinkDto link) {
         List<Long> chatIds = repository.findUsersTrackingLink(link.id());
         botNotifier.sendUpdate(new LinkUpdateDto(0, link.url(), "Новое обновление", chatIds));
     }
