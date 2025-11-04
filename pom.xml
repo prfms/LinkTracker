@@ -17,8 +17,6 @@
 
     <modules>
         <module>bot</module>
-        <module>dto</module>
-        <module>report</module>
         <module>scrapper</module>
     </modules>
 
@@ -69,6 +67,13 @@
 
     <dependencyManagement>
         <dependencies>
+
+            <dependency>
+                <groupId>javax.xml.bind</groupId>
+                <artifactId>jaxb-api</artifactId>
+                <version>2.3.1</version>
+            </dependency>
+
             <dependency>
                 <groupId>org.jspecify</groupId>
                 <artifactId>jspecify</artifactId>
@@ -128,6 +133,7 @@
                 <artifactId>bucket4j-spring-boot-starter</artifactId>
                 <version>${bucket4j-spring-boot-starter.version}</version>
             </dependency>
+
         </dependencies>
     </dependencyManagement>
 

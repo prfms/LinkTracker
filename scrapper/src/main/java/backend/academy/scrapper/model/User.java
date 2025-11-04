@@ -6,7 +6,7 @@ import java.util.List;
 
 @Data
 @Entity
-@Table(name = "user")  // имя таблицы из миграции
+@Table(name = "users")
 public class User {
     @Id
     private Long id;

@@ -6,6 +6,7 @@
         <groupId>backend.academy</groupId>
         <artifactId>root</artifactId>
         <version>${revision}</version>
+        <relativePath>../pom.xml</relativePath>
     </parent>
 
     <artifactId>bot</artifactId>
@@ -117,11 +118,6 @@
         <!--            <artifactId>spring-kafka-test</artifactId>-->
         <!--            <scope>test</scope>-->
         <!--        </dependency>-->
-        <dependency>
-            <groupId>backend.academy</groupId>
-            <artifactId>dto</artifactId>
-            <version>1.0</version>
-        </dependency>
     </dependencies>
 
     <build>

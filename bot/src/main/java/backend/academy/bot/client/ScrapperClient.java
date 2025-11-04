@@ -5,6 +5,7 @@ import backend.academy.bot.client.dto.LinkResponseDto;
 import backend.academy.bot.client.dto.ListLinksResponseDto;
 import backend.academy.bot.client.dto.RemoveLinkRequestDto;
 import backend.academy.bot.client.dto.UserDto;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
@@ -14,12 +15,11 @@ import org.springframework.web.client.RestClient;
 public class ScrapperClient {
     private final RestClient restClient;
 
-    public ScrapperClient() {
-        this.restClient = RestClient
-            .builder()
-            .baseUrl("http://localhost:8081/api/scrapper/")
+    public ScrapperClient(@Value("${scrapper.url}") String scrapperUrl,
+                          @Value("${scrapper.port}") String scrapperPort) {
+        this.restClient = RestClient.builder()
+            .baseUrl("http://" + scrapperUrl + ":" + scrapperPort + "/api/scrapper/")
             .build();
-
     }
 
     public UserDto registerUser(Long id) {

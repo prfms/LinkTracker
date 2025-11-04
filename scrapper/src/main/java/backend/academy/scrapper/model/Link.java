@@ -1,5 +1,6 @@
 package backend.academy.scrapper.model;
 
+import io.hypersistence.utils.hibernate.type.json.JsonBinaryType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -12,10 +13,13 @@ import jakarta.persistence.Table;
 import java.time.OffsetDateTime;
 import java.util.List;
 import lombok.Data;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.annotations.Type;
+import org.hibernate.type.SqlTypes;
 
 @Data
 @Entity
-@Table(name = "link")
+@Table(name = "links")
 public class Link {
 
     @Id
@@ -27,10 +31,14 @@ public class Link {
     @Column(name = "chat_id")
     private Long chatId;
 
-    @Column(columnDefinition = "jsonb")
+    @Type(JsonBinaryType.class)
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(name = "tags", columnDefinition = "jsonb")
     private List<String> tags;
 
-    @Column(columnDefinition = "jsonb")
+    @Type(JsonBinaryType.class)
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(name = "filters", columnDefinition = "jsonb")
     private List<String> filters;
 
     @Column(name = "last_updated")

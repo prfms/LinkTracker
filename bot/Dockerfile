@@ -1,5 +1,10 @@
-FROM eclipse-temurin:17-jdk-alpine
-VOLUME /tmp
-ARG JAR_FILE=target/bot-1.0.0.jar
-COPY ${JAR_FILE} app.jar
-ENTRYPOINT ["java", "-jar", "/app.jar"]
+FROM eclipse-temurin:23-jdk-alpine
+
+WORKDIR /app
+
+COPY target/*.jar app.jar
+
+EXPOSE 8082
+ENV SERVER_PORT=8082
+
+ENTRYPOINT ["/bin/sh", "-c", "sleep 20 && java -jar app.jar"]

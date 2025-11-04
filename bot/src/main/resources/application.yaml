@@ -12,7 +12,11 @@ spring:
     open-in-view: false
 
 server:
-  port: 8080
+  port: 8082
+
+scrapper:
+  url: scrapper
+  port: 8081
 
 springdoc:
   swagger-ui:
