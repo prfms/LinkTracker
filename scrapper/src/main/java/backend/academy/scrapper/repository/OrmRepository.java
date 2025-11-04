@@ -9,6 +9,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 @Repository
 @RequiredArgsConstructor
@@ -93,6 +94,7 @@ public class OrmRepository implements CommonRepository {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<Long> findUsersTrackingLink(int id) {
         Optional<Link> linkOpt = linkRepository.findById(id);
         return linkOpt.map(link -> List.of(link.user().id())).orElseGet(List::of);

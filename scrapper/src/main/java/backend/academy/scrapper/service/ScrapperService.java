@@ -95,12 +95,8 @@ public class ScrapperService {
         if (url.contains("github.com")) {
             return gitHubClient.getLastUpdated(url);
         } else if (url.contains("stackoverflow.com")) {
-            return stackOverflowClient.getLastUpdated(extractQuestionId(url));
+            return stackOverflowClient.getLastUpdated(url);
         }
         return OffsetDateTime.MIN;
-    }
-
-    private String extractQuestionId(String url) {
-        return url.replaceAll(".*/questions/(\\d+).*", "$1");
     }
 }
