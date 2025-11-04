@@ -42,7 +42,8 @@ public class BotService {
                 new BotCommand("/track", "Добавить ссылку для отслеживания"),
                 new BotCommand("/untrack", "Удалить ссылку из отслеживания"),
                 new BotCommand("/list", "Показать отслеживаемые ссылки"),
-                new BotCommand("/help", "Получить помощь по командам")));
+                new BotCommand("/help", "Получить помощь по командам"),
+                new BotCommand("/exit", "Отменить действие, выйти")));
         bot.setUpdatesListener(updates -> {
             for (Update update : updates) {
                 if (update.message() != null) {
@@ -110,50 +111,83 @@ public class BotService {
                     sendMessage(chatId, "Список команд не доступен.");
                 }
                 break;
+            case "/exit":
+                userStates.remove(chatId);
+                sendMessage(chatId, "Действие отменено.");
+                return;
             default:
                 sendMessage(chatId, "Неизвестная команда. Используйте /help для списка команд.");
         }
     }
 
     private void processUserState(long chatId, String text) {
+        if ("/exit".equalsIgnoreCase(text)) {
+            userStates.remove(chatId);
+            sendMessage(chatId, "Действие отменено. Вы можете использовать другие команды.");
+            return;
+        }
+
         BotState state = userStates.get(chatId);
+        if (state == null) return;
 
         switch (state.step) {
             case AWAITING_LINK_TRACK:
-                if (isValidLink(text)) {
+                if (text == null || text.isBlank()) {
+                    sendMessage(chatId, "Пустая строка. Введите ссылку или /exit для отмены.");
+                    return;
+                }
+                if (!isValidLink(text)) {
+                    sendMessage(chatId,
+                        "Некорректный формат ссылки.\n" +
+                            "Допустимые форматы:\n" +
+                            "- https://github.com/user/repo\n" +
+                            "- https://stackoverflow.com/questions/12345\n" +
+                            "Попробуйте ещё раз или введите /cancel для выхода.");
+                    return;
+                }
+                try {
+                    ListLinksResponseDto existingLinks = scrapperClient.getLinks(chatId);
+                    boolean alreadyExists = existingLinks.links().stream()
+                        .anyMatch(link -> link.url().equals(text));
+                    if (alreadyExists) {
+                        sendMessage(chatId, "Эта ссылка уже отслеживается.");
+                        return;
+                    }
+
                     state.link = text;
-                    state.step = BotStep.AWAITING_TAGS;
-                    sendMessage(chatId, "Введите теги через пробел (или пропустите, отправив /skip):");
-                } else {
-                    sendMessage(chatId, "Некорректный формат ссылки. Поддерживаются ссылки с GitHub и StackOverFlow.");
+                    scrapperClient.addLink(chatId, new AddLinkRequestDto(state.link, state.tags, state.filters));
+                    userStates.remove(chatId);
+                    sendMessage(chatId, "Ссылка успешно добавлена!");
+                } catch (Exception e) {
+                    sendMessage(chatId, "Ошибка при добавлении ссылки. Попробуйте позже.");
                 }
-                break;
-
-            case AWAITING_TAGS:
-                if (!text.equals("/skip")) {
-                    state.tags = List.of(text.split(" "));
-                }
-                state.step = BotStep.AWAITING_FILTERS;
-                sendMessage(chatId, "Введите фильтры через пробел (или пропустите, отправив /skip):");
-                break;
-
-            case AWAITING_FILTERS:
-                if (!text.equals("/skip")) {
-                    state.filters = List.of(text.split(" "));
-                }
-                scrapperClient.addLink(chatId, new AddLinkRequestDto(state.link, state.tags, state.filters));
-                sendMessage(chatId, "Ссылка успешно добавлена!");
-                userStates.remove(chatId);
                 break;
 
             case AWAITING_LINK_UNTRACK:
-                state.link = text;
-                scrapperClient.deleteLink(chatId, new RemoveLinkRequestDto(state.link));
-                sendMessage(chatId, "Ссылка успешно удалена из отслеживания!");
-                userStates.remove(chatId);
+                if (text == null || text.isBlank()) {
+                    sendMessage(chatId, "Пустая строка. Введите ссылку или /exit для отмены.");
+                    return;
+                }
+                try {
+                    ListLinksResponseDto existingLinks = scrapperClient.getLinks(chatId);
+                    boolean exists = existingLinks.links().stream()
+                        .anyMatch(link -> link.url().equals(text));
+                    if (!exists) {
+                        sendMessage(chatId, "Эта ссылка не найдена в ваших отслеживаемых.");
+                        return;
+                    }
+
+                    state.link = text;
+                    scrapperClient.deleteLink(chatId, new RemoveLinkRequestDto(state.link));
+                    userStates.remove(chatId);
+                    sendMessage(chatId, "Ссылка успешно удалена из отслеживания!");
+                } catch (Exception e) {
+                    sendMessage(chatId, "Ошибка при удалении ссылки. Попробуйте позже.");
+                }
                 break;
         }
     }
+
 
     private boolean isValidLink(String link) {
         return Pattern.matches("^https:\\/\\/stackoverflow\\.com\\/questions\\/\\d+\\/?", link)
@@ -180,8 +214,6 @@ public class BotService {
 
     public enum BotStep {
         AWAITING_LINK_TRACK,
-        AWAITING_TAGS,
-        AWAITING_FILTERS,
         AWAITING_LINK_UNTRACK,
     }
 }

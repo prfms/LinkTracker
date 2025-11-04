@@ -15,7 +15,7 @@ server:
   port: 8082
 
 scrapper:
-  url: scrapper
+  url: localhost
   port: 8081
 
 springdoc:
