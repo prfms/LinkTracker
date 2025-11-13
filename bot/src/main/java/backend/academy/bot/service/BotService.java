@@ -142,7 +142,7 @@ public class BotService {
                             "Допустимые форматы:\n" +
                             "- https://github.com/user/repo\n" +
                             "- https://stackoverflow.com/questions/12345\n" +
-                            "Попробуйте ещё раз или введите /cancel для выхода.");
+                            "Попробуйте ещё раз или введите /exit для выхода.");
                     return;
                 }
                 try {
@@ -191,7 +191,8 @@ public class BotService {
 
     private boolean isValidLink(String link) {
         return Pattern.matches("^https:\\/\\/stackoverflow\\.com\\/questions\\/\\d+\\/?", link)
-            || Pattern.matches("https:\\/\\/github\\.com\\/[(a-zA-Z0-9_]+\\/[(a-zA-Z0-9_-]+\\/?", link);
+            || Pattern.matches("https:\\/\\/github\\.com\\/[(a-zA-Z0-9_]+\\/[(a-zA-Z0-9_-]+\\/?", link)
+            || Pattern.matches( "^https:\\/\\/[\\w.-]+(\\/[\\w\\-._~:/?#\\[\\]@!$&'()*+,;=%]*)?$", link);
     }
 
     private void sendMessage(long chatId, String text) {

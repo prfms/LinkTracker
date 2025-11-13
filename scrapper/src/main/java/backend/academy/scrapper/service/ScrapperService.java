@@ -13,28 +13,18 @@ import backend.academy.scrapper.controller.dto.LinkResponseDto;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.logging.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 @Service
+@RequiredArgsConstructor
 public class ScrapperService {
     private final CommonRepository repository;
     private final GitHubClient gitHubClient;
     private final StackOverflowClient stackOverflowClient;
     private final BotNotifier botNotifier;
+    private final GenericHtmlContentProvider htmlContentProvider;
     private static final Logger LOGGER = Logger.getLogger(ScrapperService.class.getName());
-
-    @Autowired
-    public ScrapperService(
-            CommonRepository repository,
-            GitHubClient gitHubClient,
-            StackOverflowClient stackOverflowClient,
-            BotNotifier botNotifier) {
-        this.repository = repository;
-        this.gitHubClient = gitHubClient;
-        this.stackOverflowClient = stackOverflowClient;
-        this.botNotifier = botNotifier;
-    }
 
     public long registerUser(long chatId) {
         return repository.addUser(chatId);
@@ -72,16 +62,22 @@ public class ScrapperService {
         List<LinkDto> links = repository.getAllLinks();
         LOGGER.info("Проверка " + links.size() + " ссылок на обновления");
         for (LinkDto link : links) {
-            OffsetDateTime newLastUpdated = getLastUpdatedTime(link.url());
-            LOGGER.info("Ссылка: " + link.url() + " | Старый lastUpdated: " + link.lastUpdated()
+            String url = link.url().toLowerCase();
+            if (url.contains("github.com") || url.contains("stackoverflow.com")) {
+                OffsetDateTime newLastUpdated = getLastUpdatedTime(url);
+                LOGGER.info("Ссылка: " + url + " | Старый lastUpdated: " + link.lastUpdated()
                     + " | Новый lastUpdated: " + newLastUpdated);
 
-            if (newLastUpdated != null && newLastUpdated.isAfter(link.lastUpdated())) {
-                repository.updateLastChecked(link, newLastUpdated);
-                LOGGER.info("Обновлена lastUpdated в БД для ссылки:" + link.url());
-                sendUpdateToUsers(link);
+                if (newLastUpdated != null && newLastUpdated.isAfter(link.lastUpdated())) {
+                    repository.updateLastChecked(link, newLastUpdated);
+                    LOGGER.info("Обновлена lastUpdated в БД для ссылки:" + url);
+                    sendUpdateToUsers(link);
+                } else {
+                    LOGGER.info("Нет обновлений для ссылки " + url);
+                }
             } else {
-                LOGGER.info("Нет обновлений для ссылки " + link.url());
+                LOGGER.info("Проверка generic HTML ссылки: " + url);
+                htmlContentProvider.checkAndNotify(link).block();
             }
         }
     }
@@ -97,6 +93,6 @@ public class ScrapperService {
         } else if (url.contains("stackoverflow.com")) {
             return stackOverflowClient.getLastUpdated(url);
         }
-        return OffsetDateTime.MIN;
+        return null;
     }
 }
