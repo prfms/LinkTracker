@@ -1,7 +1,7 @@
 package backend.academy.scrapper.clients;
 
-import java.time.OffsetDateTime;
+import backend.academy.scrapper.controller.dto.UpdateInfo;
 
 public interface LinkUpdateClient {
-    OffsetDateTime getLastUpdated(String url);
+    UpdateInfo getUpdateInfo(String url);
 }

@@ -17,7 +17,7 @@ public class LinkUpdateScheduler {
         this.scrapperService = scrapperService;
     }
 
-    @Scheduled(fixedRate = 60_000) // Каждую минуту
+    @Scheduled(fixedRate = 300_000) // Каждые 5 минут
     public void checkUpdates() {
         scrapperService.checkAndUpdateLinks();
     }

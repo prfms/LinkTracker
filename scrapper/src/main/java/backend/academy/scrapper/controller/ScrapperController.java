@@ -47,7 +47,7 @@ public class ScrapperController {
     @GetMapping("/links")
     public ResponseEntity<ListLinksResponseDto> getLinks(@RequestHeader("Tg-Chat-Id") @Min(1) long chatId) {
         List<LinkResponseDto> links = scrapperService.getLinks(chatId).stream()
-                .map(link -> new LinkResponseDto(link.id(), link.url(), link.tags(), link.filters()))
+                .map(link -> new LinkResponseDto(link.id(), link.url()))
                 .toList();
         return ResponseEntity.ok(new ListLinksResponseDto(links, links.size()));
     }
@@ -56,7 +56,7 @@ public class ScrapperController {
     public ResponseEntity<LinkResponseDto> addLink(
             @RequestHeader("Tg-Chat-Id") @Min(1) long chatId, @Valid @RequestBody AddLinkRequestDto link) {
         int id = scrapperService.addLink(chatId, link);
-        return ResponseEntity.ok(new LinkResponseDto(id, link.link(), link.tags(), link.filters()));
+        return ResponseEntity.ok(new LinkResponseDto(id, link.link()));
     }
 
     @DeleteMapping("/links")
@@ -67,6 +67,6 @@ public class ScrapperController {
             throw new NoSuchElementException("Ссылка должна быть добавлена перед удалением");
         }
         return ResponseEntity.ok(new LinkResponseDto(
-                responseLink.id(), responseLink.url(), responseLink.tags(), responseLink.filters()));
+                responseLink.id(), responseLink.url()));
     }
 }

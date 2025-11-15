@@ -7,7 +7,7 @@ import java.util.List;
 public interface CommonRepository {
     long addUser(long userId);
 
-    int addLink(String url, long chatId, List<String> tags, List<String> filters, OffsetDateTime lastUpdated);
+    int addLink(String url, long chatId, OffsetDateTime lastUpdated);
 
     LinkDto removeLink(String url, long chatId);
 

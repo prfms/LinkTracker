@@ -5,6 +5,7 @@ import backend.academy.scrapper.clients.StackOverflowClient;
 import backend.academy.scrapper.controller.dto.AddLinkRequestDto;
 import backend.academy.scrapper.controller.dto.LinkUpdateDto;
 import backend.academy.scrapper.controller.dto.RemoveLinkRequestDto;
+import backend.academy.scrapper.controller.dto.UpdateInfo;
 import backend.academy.scrapper.exception.NotFoundException;
 import backend.academy.scrapper.model.LinkDto;
 import backend.academy.scrapper.repository.CommonRepository;
@@ -39,7 +40,7 @@ public class ScrapperService {
 
             List<LinkDto> links = repository.getLinks(chatId);
             return links.stream()
-                    .map(link -> new LinkResponseDto(link.id(), link.url(), link.tags(), link.filters()))
+                    .map(link -> new LinkResponseDto(link.id(), link.url()))
                     .toList();
         } else {
             throw new NotFoundException("Пользователь с ID " + chatId + " не найден.");
@@ -47,7 +48,7 @@ public class ScrapperService {
     }
 
     public int addLink(long chatId, AddLinkRequestDto link) {
-        return repository.addLink(link.link(), chatId, link.tags(), link.filters(), getLastUpdatedTime(link.link()));
+        return repository.addLink(link.link(), chatId, getUpdateInfo(link.link()).lastUpdatedAt());
     }
 
     public LinkDto deleteLink(long chatId, RemoveLinkRequestDto link) {
@@ -64,14 +65,15 @@ public class ScrapperService {
         for (LinkDto link : links) {
             String url = link.url().toLowerCase();
             if (url.contains("github.com") || url.contains("stackoverflow.com")) {
-                OffsetDateTime newLastUpdated = getLastUpdatedTime(url);
+                UpdateInfo updateInfo = getUpdateInfo(url);
+                OffsetDateTime newLastUpdated = updateInfo.lastUpdatedAt();
                 LOGGER.info("Ссылка: " + url + " | Старый lastUpdated: " + link.lastUpdated()
                     + " | Новый lastUpdated: " + newLastUpdated);
 
                 if (newLastUpdated != null && newLastUpdated.isAfter(link.lastUpdated())) {
                     repository.updateLastChecked(link, newLastUpdated);
                     LOGGER.info("Обновлена lastUpdated в БД для ссылки:" + url);
-                    sendUpdateToUsers(link);
+                    sendUpdateToUsers(link, updateInfo.description());
                 } else {
                     LOGGER.info("Нет обновлений для ссылки " + url);
                 }
@@ -82,16 +84,16 @@ public class ScrapperService {
         }
     }
 
-    private void sendUpdateToUsers(LinkDto link) {
+    private void sendUpdateToUsers(LinkDto link, String description) {
         List<Long> chatIds = repository.findUsersTrackingLink(link.id());
-        botNotifier.sendUpdate(new LinkUpdateDto(0, link.url(), "Новое обновление", chatIds));
+        botNotifier.sendUpdate(new LinkUpdateDto(0, link.url(), description, chatIds));
     }
 
-    private OffsetDateTime getLastUpdatedTime(String url) {
+    private UpdateInfo getUpdateInfo(String url) {
         if (url.contains("github.com")) {
-            return gitHubClient.getLastUpdated(url);
+            return gitHubClient.getUpdateInfo(url);
         } else if (url.contains("stackoverflow.com")) {
-            return stackOverflowClient.getLastUpdated(url);
+            return stackOverflowClient.getUpdateInfo(url);
         }
         return null;
     }

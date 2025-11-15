@@ -1,5 +1,6 @@
 package backend.academy.scrapper.clients;
 
+import backend.academy.scrapper.controller.dto.UpdateInfo;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.time.Instant;
 import java.time.OffsetDateTime;
@@ -18,7 +19,7 @@ public class StackOverflowClient implements LinkUpdateClient {
     }
 
     @Override
-    public OffsetDateTime getLastUpdated(String questionUrl) {
+    public UpdateInfo getUpdateInfo(String questionUrl) {
         String questionId = extractQuestionId(questionUrl);
 
         AnswersResponse response = webClient
@@ -29,7 +30,7 @@ public class StackOverflowClient implements LinkUpdateClient {
             .block();
 
         if (response == null || response.items == null || response.items.isEmpty()) {
-            return getQuestionLastActivity(questionId);
+            return new UpdateInfo(getQuestionLastActivity(questionId), "Новое обновление");
         }
 
         long maxTimestamp = response.items.stream()
@@ -37,7 +38,8 @@ public class StackOverflowClient implements LinkUpdateClient {
             .max()
             .orElseThrow(() -> new IllegalStateException("Нет данных об ответах"));
 
-        return Instant.ofEpochSecond(maxTimestamp).atOffset(ZoneOffset.UTC);
+        var time = Instant.ofEpochSecond(maxTimestamp).atOffset(ZoneOffset.UTC);
+        return new UpdateInfo(time, "Новое обновление");
     }
 
     private OffsetDateTime getQuestionLastActivity(String questionId) {

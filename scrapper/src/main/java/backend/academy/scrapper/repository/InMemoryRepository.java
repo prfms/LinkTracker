@@ -16,18 +16,16 @@ public class InMemoryRepository implements CommonRepository {
     }
 
     @Override
-    public int addLink(String url, long chatId, List<String> tags, List<String> filters, OffsetDateTime lastUpdated) {
+    public int addLink(String url, long chatId, OffsetDateTime lastUpdated) {
         for (int i = 0; i < trackedLinks.size(); i++) {
             LinkDto link = trackedLinks.get(i);
             if (link.url().equals(url)
-                    && link.chatId() == chatId
-                    && link.tags().equals(tags)
-                    && link.filters().equals(filters)) {
+                    && link.chatId() == chatId) {
                 return i;
             }
         }
 
-        LinkDto addedLink = new LinkDto(trackedLinks.size(), url, chatId, tags, filters, lastUpdated);
+        LinkDto addedLink = new LinkDto(trackedLinks.size(), url, chatId, lastUpdated);
         trackedLinks.add(addedLink);
         return trackedLinks.size() - 1;
     }

@@ -145,14 +145,6 @@ components:
         url:
           type: string
           format: uri
-        tags:
-          type: array
-          items:
-            type: string
-        filters:
-          type: array
-          items:
-            type: string
     ApiErrorResponse:
       type: object
       properties:
@@ -174,14 +166,6 @@ components:
         link:
           type: string
           format: uri
-        tags:
-          type: array
-          items:
-            type: string
-        filters:
-          type: array
-          items:
-            type: string
     ListLinksResponse:
       type: object
       properties:

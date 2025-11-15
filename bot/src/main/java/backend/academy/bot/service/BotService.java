@@ -3,6 +3,7 @@ package backend.academy.bot.service;
 import backend.academy.bot.BotConfig;
 import backend.academy.bot.client.ScrapperClient;
 import backend.academy.bot.client.dto.AddLinkRequestDto;
+import backend.academy.bot.client.dto.LinkResponseDto;
 import backend.academy.bot.client.dto.ListLinksResponseDto;
 import backend.academy.bot.client.dto.RemoveLinkRequestDto;
 import com.pengrad.telegrambot.TelegramBot;
@@ -15,7 +16,6 @@ import com.pengrad.telegrambot.request.SendMessage;
 import com.pengrad.telegrambot.request.SetMyCommands;
 import jakarta.annotation.PostConstruct;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 import lombok.Getter;
@@ -83,7 +83,7 @@ public class BotService {
                 } else {
                     String response = "Отслеживаемые ссылки:\n"
                             + listLinks.links().stream()
-                                    .map(link -> link.url() + " (Теги: " + String.join(", ", link.tags()) + ")")
+                                    .map(LinkResponseDto::url)
                                     .reduce("", (a, b) -> a + "\n" + b);
                     sendMessage(chatId, response);
                 }
@@ -155,7 +155,7 @@ public class BotService {
                     }
 
                     state.link = text;
-                    scrapperClient.addLink(chatId, new AddLinkRequestDto(state.link, state.tags, state.filters));
+                    scrapperClient.addLink(chatId, new AddLinkRequestDto(state.link));
                     userStates.remove(chatId);
                     sendMessage(chatId, "Ссылка успешно добавлена!");
                 } catch (Exception e) {
@@ -205,8 +205,6 @@ public class BotService {
         private BotStep step;
         @Getter
         private String link;
-        private List<String> tags = List.of();
-        private List<String> filters = List.of();
 
         public BotState(BotStep step) {
             this.step = step;

@@ -28,15 +28,13 @@ public class OrmRepository implements CommonRepository {
     }
 
     @Override
-    public int addLink(String url, long chatId, List<String> tags, List<String> filters, OffsetDateTime lastUpdated) {
+    public int addLink(String url, long chatId, OffsetDateTime lastUpdated) {
         User user = userRepository.findById(chatId)
             .orElseThrow(() -> new IllegalArgumentException("User not found with chatId = " + chatId));
 
         Link link = new Link();
         link.url(url);
         link.chatId(chatId);
-        link.tags(tags);
-        link.filters(filters);
         link.lastUpdated(lastUpdated);
         link.user(user);
 
@@ -111,8 +109,6 @@ public class OrmRepository implements CommonRepository {
             link.id(),
             link.url(),
             link.chatId(),
-            link.tags(),
-            link.filters(),
             link.lastUpdated()
         );
     }
