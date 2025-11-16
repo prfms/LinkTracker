@@ -15,6 +15,7 @@ import backend.academy.scrapper.scheduler.BotNotifier;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.List;
+import java.util.Locale;
 import java.util.logging.Logger;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -65,7 +66,7 @@ public class ScrapperService {
         List<LinkDto> links = repository.getAllLinks();
         LOGGER.info("Проверка " + links.size() + " ссылок на обновления");
         for (LinkDto link : links) {
-            String url = link.url().toLowerCase();
+            String url = link.url().toLowerCase(Locale.ROOT);
             UpdateInfo updateInfo = getUpdateInfo(url);
             if (updateInfo == null) {
                 LOGGER.info("Обновлений по ссылке " + url + " нет. Пропускаем");

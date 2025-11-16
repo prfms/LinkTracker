@@ -59,10 +59,11 @@ public class OrmRepository implements CommonRepository {
 
     @Override
     public LinkDto removeLink(String url, long chatId) {
-        Optional<Link> linkOpt = linkRepository.findByUrlAndChatId(url, chatId);
-        if (linkOpt.isEmpty()) return null;
+        Link link = linkRepository.findByUrlAndChatId(url, chatId).orElse(null);
+        if (link == null) {
+            return null;
+        }
 
-        Link link = linkOpt.get();
         linkRepository.delete(link);
         return toDto(link);
     }
@@ -84,10 +85,12 @@ public class OrmRepository implements CommonRepository {
 
     @Override
     public long deleteUser(long chatId) {
-        Optional<User> userOpt = userRepository.findById(chatId);
-        if (userOpt.isEmpty()) return 0;
+        User user = userRepository.findById(chatId).orElse(null);
+        if (user == null) {
+            return 0;
+        }
 
-        userRepository.delete(userOpt.get());
+        userRepository.delete(user);
         return chatId;
     }
 

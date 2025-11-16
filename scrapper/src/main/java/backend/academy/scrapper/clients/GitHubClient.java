@@ -2,6 +2,7 @@ package backend.academy.scrapper.clients;
 
 import backend.academy.scrapper.controller.dto.UpdateInfo;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.common.base.Splitter;
 import java.time.OffsetDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -26,19 +27,20 @@ public class GitHubClient implements LinkUpdateClient {
                 .build();
     }
 
+    @Override
     public UpdateInfo getUpdateInfo(String url) {
         try {
-            String[] parts = url.split("/");
-            if (parts.length < 5) {
+            List<String> parts = Splitter.on('/').splitToList(url);
+            if (parts.size() < 5) {
                 throw new IllegalArgumentException("Некорректный GitHub URL: " + url);
             }
 
-            String owner = parts[3];
-            String repo = parts[4];
+            String owner = parts.get(3).toLowerCase(Locale.ROOT);
+            String repo = parts.get(4).toLowerCase(Locale.ROOT);
 
             // repos/{owner}/{repo}/pulls/{pull_number}
-            if (parts.length >= 7 && "pull".equals(parts[5])) {
-                int prNumber = Integer.parseInt(parts[6]);
+            if (parts.size() >= 7 && "pull".equals(parts.get(5))) {
+                int prNumber = Integer.parseInt(parts.get(6));
                 PullRequest pr = fetchPullRequest(owner, repo, prNumber);
                 OffsetDateTime updatedAt = pr.updatedAt();
                 String description = String.format("Pull Request #%d «%s» обновлён", prNumber, pr.title());
@@ -46,8 +48,8 @@ public class GitHubClient implements LinkUpdateClient {
             }
 
             // repos/{owner}/{repo}/issues/{issue_number}
-            if (parts.length >= 7 && "issues".equals(parts[5])) {
-                int issueNumber = Integer.parseInt(parts[6]);
+            if (parts.size() >= 7 && "issues".equals(parts.get(5))) {
+                int issueNumber = Integer.parseInt(parts.get(6));
                 Issue issue = fetchIssue(owner, repo, issueNumber);
                 OffsetDateTime updatedAt = issue.updatedAt();
                 String description =

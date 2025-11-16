@@ -2,6 +2,7 @@ package backend.academy.scrapper.clients;
 
 import backend.academy.scrapper.controller.dto.UpdateInfo;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.common.base.Splitter;
 import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
@@ -58,10 +59,10 @@ public class StackOverflowClient implements LinkUpdateClient {
     }
 
     private String extractQuestionId(String url) {
-        String[] parts = url.split("/");
-        for (int i = 0; i < parts.length; i++) {
-            if ("questions".equals(parts[i]) && i + 1 < parts.length) {
-                return parts[i + 1];
+        List<String> parts = Splitter.on('/').splitToList(url);
+        for (int i = 0; i < parts.size(); i++) {
+            if ("questions".equals(parts.get(i)) && i + 1 < parts.size()) {
+                return parts.get(i + 1);
             }
         }
         throw new IllegalArgumentException("Невозможно извлечь ID вопроса из URL: " + url);

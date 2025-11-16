@@ -10,7 +10,6 @@ import backend.academy.scrapper.service.HttpFetchService;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.logging.Logger;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
@@ -30,13 +29,13 @@ public class GenericHtmlClient implements LinkUpdateClient {
     @Override
     public UpdateInfo getUpdateInfo(String url) {
         try {
-            Optional<Link> linkOpt = linkRepository.findByUrl(url);
-            if (linkOpt.isEmpty()) {
+            Link link = linkRepository.findByUrl(url).orElseGet(() -> {
                 LOGGER.warning(() -> "Ссылка не найдена в таблице links: " + url);
                 return null;
-            }
+            });
+            if (link == null) return null;
 
-            int linkId = linkOpt.get().id();
+            int linkId = link.id();
 
             LinkSignature prev = signatures.findByLinkId(linkId).orElse(null);
             String etag = prev != null ? prev.etag() : null;
@@ -51,7 +50,8 @@ public class GenericHtmlClient implements LinkUpdateClient {
             if (fetched.notModified) {
                 LOGGER.info(() -> "304 Not Modified → " + url);
                 return new UpdateInfo(
-                        prev != null ? prev.updatedAt() : OffsetDateTime.now(ZoneOffset.UTC), "Изменений не обнаружено");
+                        prev != null ? prev.updatedAt() : OffsetDateTime.now(ZoneOffset.UTC),
+                        "Изменений не обнаружено");
             }
 
             if (fetched.statusCode != null && fetched.statusCode >= 400) {
@@ -65,7 +65,7 @@ public class GenericHtmlClient implements LinkUpdateClient {
             }
 
             var extracted = extractor.extract(fetched.body, url);
-            boolean firstTime = (prev == null);
+            boolean firstTime = prev == null;
             boolean changed = prev == null || !Objects.equals(prev.hash(), extracted.compositeHash());
 
             if (!changed) {
