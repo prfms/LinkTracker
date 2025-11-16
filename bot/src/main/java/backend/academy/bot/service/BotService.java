@@ -26,6 +26,7 @@ import org.springframework.stereotype.Service;
 public class BotService {
     private final TelegramBot bot;
     private final ScrapperClient scrapperClient;
+
     @Getter
     private final Map<Long, BotState> userStates = new HashMap<>();
 
@@ -137,18 +138,18 @@ public class BotService {
                     return;
                 }
                 if (!isValidLink(text)) {
-                    sendMessage(chatId,
-                        "Некорректный формат ссылки.\n" +
-                            "Допустимые форматы:\n" +
-                            "- https://github.com/user/repo\n" +
-                            "- https://stackoverflow.com/questions/12345\n" +
-                            "Попробуйте ещё раз или введите /exit для выхода.");
+                    sendMessage(
+                            chatId,
+                            "Некорректный формат ссылки.\n" + "Допустимые форматы:\n"
+                                    + "- https://github.com/user/repo\n"
+                                    + "- https://stackoverflow.com/questions/12345\n"
+                                    + "Попробуйте ещё раз или введите /exit для выхода.");
                     return;
                 }
                 try {
                     ListLinksResponseDto existingLinks = scrapperClient.getLinks(chatId);
                     boolean alreadyExists = existingLinks.links().stream()
-                        .anyMatch(link -> link.url().equals(text));
+                            .anyMatch(link -> link.url().equals(text));
                     if (alreadyExists) {
                         sendMessage(chatId, "Эта ссылка уже отслеживается.");
                         return;
@@ -171,7 +172,7 @@ public class BotService {
                 try {
                     ListLinksResponseDto existingLinks = scrapperClient.getLinks(chatId);
                     boolean exists = existingLinks.links().stream()
-                        .anyMatch(link -> link.url().equals(text));
+                            .anyMatch(link -> link.url().equals(text));
                     if (!exists) {
                         sendMessage(chatId, "Эта ссылка не найдена в ваших отслеживаемых.");
                         return;
@@ -188,11 +189,10 @@ public class BotService {
         }
     }
 
-
     private boolean isValidLink(String link) {
         return Pattern.matches("^https:\\/\\/stackoverflow\\.com\\/questions\\/\\d+\\/?", link)
-            || Pattern.matches("https:\\/\\/github\\.com\\/[(a-zA-Z0-9_]+\\/[(a-zA-Z0-9_-]+\\/?", link)
-            || Pattern.matches( "^https:\\/\\/[\\w.-]+(\\/[\\w\\-._~:/?#\\[\\]@!$&'()*+,;=%]*)?$", link);
+                || Pattern.matches("https:\\/\\/github\\.com\\/[(a-zA-Z0-9_]+\\/[(a-zA-Z0-9_-]+\\/?", link)
+                || Pattern.matches("^https:\\/\\/[\\w.-]+(\\/[\\w\\-._~:/?#\\[\\]@!$&'()*+,;=%]*)?$", link);
     }
 
     private void sendMessage(long chatId, String text) {
@@ -203,6 +203,7 @@ public class BotService {
     public static class BotState {
         @Getter
         private BotStep step;
+
         @Getter
         private String link;
 

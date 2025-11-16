@@ -1,14 +1,12 @@
 package backend.academy.bot;
 
-
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-import backend.academy.bot.client.ScrapperClient;
 import backend.academy.bot.service.BotService;
 import com.pengrad.telegrambot.TelegramBot;
-import com.pengrad.telegrambot.model.Message;
 import com.pengrad.telegrambot.model.Chat;
+import com.pengrad.telegrambot.model.Message;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -50,12 +48,14 @@ public class LinkValidationTest {
         Message message = mockMessage("/track");
         botService.handleMessage(message);
 
-        assertEquals(BotService.BotStep.AWAITING_LINK_TRACK, botService.userStates().get(CHAT_ID).step());
+        assertEquals(
+                BotService.BotStep.AWAITING_LINK_TRACK,
+                botService.userStates().get(CHAT_ID).step());
 
         Message validLinkMessage = mockMessage("https://stackoverflow.com/questions/12345");
         botService.handleMessage(validLinkMessage);
 
-        //assertEquals(BotService.BotStep.AWAITING_TAGS, botService.userStates().get(CHAT_ID).step());
+        // assertEquals(BotService.BotStep.AWAITING_TAGS, botService.userStates().get(CHAT_ID).step());
     }
 
     @Test
@@ -63,11 +63,15 @@ public class LinkValidationTest {
         Message message = mockMessage("/track");
         botService.handleMessage(message);
 
-        assertEquals(BotService.BotStep.AWAITING_LINK_TRACK, botService.userStates().get(CHAT_ID).step());
+        assertEquals(
+                BotService.BotStep.AWAITING_LINK_TRACK,
+                botService.userStates().get(CHAT_ID).step());
 
         Message invalidLinkMessage = mockMessage("invalid_link");
         botService.handleMessage(invalidLinkMessage);
 
-        assertEquals(BotService.BotStep.AWAITING_LINK_TRACK, botService.userStates().get(CHAT_ID).step());
+        assertEquals(
+                BotService.BotStep.AWAITING_LINK_TRACK,
+                botService.userStates().get(CHAT_ID).step());
     }
 }

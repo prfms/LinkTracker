@@ -19,8 +19,7 @@ public class InMemoryRepository implements CommonRepository {
     public int addLink(String url, long chatId, OffsetDateTime lastUpdated) {
         for (int i = 0; i < trackedLinks.size(); i++) {
             LinkDto link = trackedLinks.get(i);
-            if (link.url().equals(url)
-                    && link.chatId() == chatId) {
+            if (link.url().equals(url) && link.chatId() == chatId) {
                 return i;
             }
         }

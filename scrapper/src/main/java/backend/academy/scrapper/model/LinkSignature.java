@@ -6,8 +6,8 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-import lombok.*;
 import java.time.OffsetDateTime;
+import lombok.*;
 
 @Getter
 @Setter
@@ -23,7 +23,7 @@ public class LinkSignature {
     private Long id;
 
     @Column(name = "link_id", nullable = false)
-    private Long linkId;
+    private int linkId;
 
     @Column(name = "etag")
     private String etag;
@@ -31,8 +31,8 @@ public class LinkSignature {
     @Column(name = "last_modified")
     private String lastModified;
 
-    @Column(name = "composite_hash", length = 64)
-    private String compositeHash;
+    @Column(name = "hash", length = 64)
+    private String hash;
 
     @Column(name = "updated_at", nullable = false)
     private OffsetDateTime updatedAt;

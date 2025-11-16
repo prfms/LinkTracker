@@ -66,7 +66,6 @@ public class ScrapperController {
         if (responseLink == null) {
             throw new NoSuchElementException("Ссылка должна быть добавлена перед удалением");
         }
-        return ResponseEntity.ok(new LinkResponseDto(
-                responseLink.id(), responseLink.url()));
+        return ResponseEntity.ok(new LinkResponseDto(responseLink.id(), responseLink.url()));
     }
 }

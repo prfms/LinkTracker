@@ -15,21 +15,21 @@ import org.springframework.web.client.RestClient;
 public class ScrapperClient {
     private final RestClient restClient;
 
-    public ScrapperClient(@Value("${scrapper.url}") String scrapperUrl,
-                          @Value("${scrapper.port}") String scrapperPort) {
+    public ScrapperClient(
+            @Value("${scrapper.url}") String scrapperUrl, @Value("${scrapper.port}") String scrapperPort) {
         this.restClient = RestClient.builder()
-            .baseUrl("http://" + scrapperUrl + ":" + scrapperPort + "/api/scrapper/")
-            .build();
+                .baseUrl("http://" + scrapperUrl + ":" + scrapperPort + "/api/scrapper/")
+                .build();
     }
 
     public UserDto registerUser(Long id) {
         return restClient
-            .post()
-            .uri("tg-chat/{id}", id)
-            .contentType(MediaType.APPLICATION_JSON)
-            .accept(MediaType.APPLICATION_JSON)
-            .retrieve()
-            .body(UserDto.class);
+                .post()
+                .uri("tg-chat/{id}", id)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .retrieve()
+                .body(UserDto.class);
     }
 
     public UserDto deleteUser(Long id) {

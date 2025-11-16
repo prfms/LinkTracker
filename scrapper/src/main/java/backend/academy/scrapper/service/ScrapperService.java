@@ -3,6 +3,7 @@ package backend.academy.scrapper.service;
 import backend.academy.scrapper.clients.GitHubClient;
 import backend.academy.scrapper.clients.StackOverflowClient;
 import backend.academy.scrapper.controller.dto.AddLinkRequestDto;
+import backend.academy.scrapper.controller.dto.LinkResponseDto;
 import backend.academy.scrapper.controller.dto.LinkUpdateDto;
 import backend.academy.scrapper.controller.dto.RemoveLinkRequestDto;
 import backend.academy.scrapper.controller.dto.UpdateInfo;
@@ -10,7 +11,6 @@ import backend.academy.scrapper.exception.NotFoundException;
 import backend.academy.scrapper.model.LinkDto;
 import backend.academy.scrapper.repository.CommonRepository;
 import backend.academy.scrapper.scheduler.BotNotifier;
-import backend.academy.scrapper.controller.dto.LinkResponseDto;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.logging.Logger;
@@ -24,7 +24,7 @@ public class ScrapperService {
     private final GitHubClient gitHubClient;
     private final StackOverflowClient stackOverflowClient;
     private final BotNotifier botNotifier;
-    private final GenericHtmlContentProvider htmlContentProvider;
+    private final GenericHtmlClient htmlClient;
     private static final Logger LOGGER = Logger.getLogger(ScrapperService.class.getName());
 
     public long registerUser(long chatId) {
@@ -48,7 +48,7 @@ public class ScrapperService {
     }
 
     public int addLink(long chatId, AddLinkRequestDto link) {
-        return repository.addLink(link.link(), chatId, getUpdateInfo(link.link()).lastUpdatedAt());
+        return repository.addLink(link.link(), chatId, OffsetDateTime.now());
     }
 
     public LinkDto deleteLink(long chatId, RemoveLinkRequestDto link) {
@@ -64,22 +64,20 @@ public class ScrapperService {
         LOGGER.info("Проверка " + links.size() + " ссылок на обновления");
         for (LinkDto link : links) {
             String url = link.url().toLowerCase();
-            if (url.contains("github.com") || url.contains("stackoverflow.com")) {
-                UpdateInfo updateInfo = getUpdateInfo(url);
-                OffsetDateTime newLastUpdated = updateInfo.lastUpdatedAt();
-                LOGGER.info("Ссылка: " + url + " | Старый lastUpdated: " + link.lastUpdated()
-                    + " | Новый lastUpdated: " + newLastUpdated);
+            UpdateInfo updateInfo = getUpdateInfo(url);
+            if (updateInfo == null) {
+                return;
+            }
+            OffsetDateTime newLastUpdated = updateInfo.lastUpdatedAt();
+            LOGGER.info("Ссылка: " + url + " | Старый lastUpdated: " + link.lastUpdated() + " | Новый lastUpdated: "
+                    + newLastUpdated);
 
-                if (newLastUpdated != null && newLastUpdated.isAfter(link.lastUpdated())) {
-                    repository.updateLastChecked(link, newLastUpdated);
-                    LOGGER.info("Обновлена lastUpdated в БД для ссылки:" + url);
-                    sendUpdateToUsers(link, updateInfo.description());
-                } else {
-                    LOGGER.info("Нет обновлений для ссылки " + url);
-                }
+            if (newLastUpdated != null && newLastUpdated.isAfter(link.lastUpdated())) {
+                repository.updateLastChecked(link, newLastUpdated);
+                LOGGER.info("Обновлена lastUpdated в БД для ссылки:" + url);
+                sendUpdateToUsers(link, updateInfo.description());
             } else {
-                LOGGER.info("Проверка generic HTML ссылки: " + url);
-                htmlContentProvider.checkAndNotify(link).block();
+                LOGGER.info("Нет обновлений для ссылки " + url);
             }
         }
     }
@@ -94,7 +92,8 @@ public class ScrapperService {
             return gitHubClient.getUpdateInfo(url);
         } else if (url.contains("stackoverflow.com")) {
             return stackOverflowClient.getUpdateInfo(url);
+        } else {
+            return htmlClient.getUpdateInfo(url);
         }
-        return null;
     }
 }

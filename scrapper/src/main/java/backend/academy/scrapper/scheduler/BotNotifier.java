@@ -1,7 +1,7 @@
 package backend.academy.scrapper.scheduler;
 
-import java.util.logging.Logger;
 import backend.academy.scrapper.controller.dto.LinkUpdateDto;
+import java.util.logging.Logger;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
@@ -11,11 +11,10 @@ public class BotNotifier {
     private final RestClient restClient;
     private static final Logger LOGGER = Logger.getLogger(BotNotifier.class.getName());
 
-    public BotNotifier(@Value("${bot.url}") String botUrl,
-                       @Value("${bot.port}") String botPort) {
+    public BotNotifier(@Value("${bot.url}") String botUrl, @Value("${bot.port}") String botPort) {
         this.restClient = RestClient.builder()
-            .baseUrl("http://" + botUrl + ":" + botPort + "/api/bot/")
-            .build();
+                .baseUrl("http://" + botUrl + ":" + botPort + "/api/bot/")
+                .build();
     }
 
     public LinkUpdateDto sendUpdate(LinkUpdateDto update) {

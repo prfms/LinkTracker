@@ -2,14 +2,13 @@ package backend.academy.scrapper.clients;
 
 import backend.academy.scrapper.controller.dto.UpdateInfo;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import java.time.OffsetDateTime;
+import java.util.*;
+import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
-
-import java.time.OffsetDateTime;
-import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 public class GitHubClient implements LinkUpdateClient {
@@ -42,10 +41,7 @@ public class GitHubClient implements LinkUpdateClient {
                 int prNumber = Integer.parseInt(parts[6]);
                 PullRequest pr = fetchPullRequest(owner, repo, prNumber);
                 OffsetDateTime updatedAt = pr.updatedAt();
-                String description = String.format(
-                    "Pull Request #%d «%s» обновлён",
-                    prNumber, pr.title()
-                );
+                String description = String.format("Pull Request #%d «%s» обновлён", prNumber, pr.title());
                 return new UpdateInfo(updatedAt, description);
             }
 
@@ -54,10 +50,8 @@ public class GitHubClient implements LinkUpdateClient {
                 int issueNumber = Integer.parseInt(parts[6]);
                 Issue issue = fetchIssue(owner, repo, issueNumber);
                 OffsetDateTime updatedAt = issue.updatedAt();
-                String description = String.format(
-                    "Issue #%d «%s» (%s) обновлён",
-                    issueNumber, issue.title(), issue.state()
-                );
+                String description =
+                        String.format("Issue #%d «%s» (%s) обновлён", issueNumber, issue.title(), issue.state());
                 return new UpdateInfo(updatedAt, description);
             }
 
@@ -66,13 +60,8 @@ public class GitHubClient implements LinkUpdateClient {
             OffsetDateTime repoUpdated = repoInfo.pushedAt();
 
             GitHubUpdateDetails latest = fetchLatestUpdate(url);
-            OffsetDateTime updatedAt = latest.createdAt().isAfter(repoUpdated)
-                ? latest.createdAt()
-                : repoUpdated;
-            String description = String.format(
-                "Репозиторий %s/%s был обновлён",
-                owner, repo
-            );
+            OffsetDateTime updatedAt = latest.createdAt().isAfter(repoUpdated) ? latest.createdAt() : repoUpdated;
+            String description = String.format("Репозиторий %s/%s был обновлён", owner, repo);
             return new UpdateInfo(updatedAt, description);
 
         } catch (Exception e) {
@@ -80,29 +69,31 @@ public class GitHubClient implements LinkUpdateClient {
         }
     }
 
-
     private RepositoryResponse fetchRepository(String owner, String repo) {
-        return webClient.get()
-            .uri("/repos/{owner}/{repo}", owner, repo)
-            .retrieve()
-            .bodyToMono(RepositoryResponse.class)
-            .block();
+        return webClient
+                .get()
+                .uri("/repos/{owner}/{repo}", owner, repo)
+                .retrieve()
+                .bodyToMono(RepositoryResponse.class)
+                .block();
     }
 
     private PullRequest fetchPullRequest(String owner, String repo, int number) {
-        return webClient.get()
-            .uri("/repos/{owner}/{repo}/pulls/{number}", owner, repo, number)
-            .retrieve()
-            .bodyToMono(PullRequest.class)
-            .block();
+        return webClient
+                .get()
+                .uri("/repos/{owner}/{repo}/pulls/{number}", owner, repo, number)
+                .retrieve()
+                .bodyToMono(PullRequest.class)
+                .block();
     }
 
     private Issue fetchIssue(String owner, String repo, int number) {
-        return webClient.get()
-            .uri("/repos/{owner}/{repo}/issues/{number}", owner, repo, number)
-            .retrieve()
-            .bodyToMono(Issue.class)
-            .block();
+        return webClient
+                .get()
+                .uri("/repos/{owner}/{repo}/issues/{number}", owner, repo, number)
+                .retrieve()
+                .bodyToMono(Issue.class)
+                .block();
     }
 
     private GitHubUpdateDetails fetchLatestUpdate(String repoUrl) {
@@ -114,28 +105,29 @@ public class GitHubClient implements LinkUpdateClient {
         List<Issue> issues = fetchIssues(owner, repo);
 
         // фильтруем "чистые" Issue (без PR)
-        List<Issue> pureIssues = issues.stream()
-            .filter(i -> i.pullRequest == null)
-            .collect(Collectors.toList());
+        List<Issue> pureIssues =
+                issues.stream().filter(i -> i.pullRequest == null).collect(Collectors.toList());
 
         return getLatestUpdate(prs, pureIssues);
     }
 
     private List<PullRequest> fetchPullRequests(String owner, String repo) {
-        PullRequest[] prs = webClient.get()
-            .uri("/repos/{owner}/{repo}/pulls?state=all&sort=created&direction=desc", owner, repo)
-            .retrieve()
-            .bodyToMono(PullRequest[].class)
-            .block();
+        PullRequest[] prs = webClient
+                .get()
+                .uri("/repos/{owner}/{repo}/pulls?state=all&sort=created&direction=desc", owner, repo)
+                .retrieve()
+                .bodyToMono(PullRequest[].class)
+                .block();
         return prs != null ? Arrays.asList(prs) : List.of();
     }
 
     private List<Issue> fetchIssues(String owner, String repo) {
-        Issue[] issues = webClient.get()
-            .uri("/repos/{owner}/{repo}/issues?state=all&sort=created&direction=desc", owner, repo)
-            .retrieve()
-            .bodyToMono(Issue[].class)
-            .block();
+        Issue[] issues = webClient
+                .get()
+                .uri("/repos/{owner}/{repo}/issues?state=all&sort=created&direction=desc", owner, repo)
+                .retrieve()
+                .bodyToMono(Issue[].class)
+                .block();
         return issues != null ? Arrays.asList(issues) : List.of();
     }
 
@@ -147,12 +139,7 @@ public class GitHubClient implements LinkUpdateClient {
             if (pr.createdAt() != null && pr.createdAt().isAfter(latestTime)) {
                 latestTime = pr.createdAt();
                 latest = new GitHubUpdateDetails(
-                    "Pull Request",
-                    pr.title(),
-                    pr.user().login(),
-                    pr.createdAt(),
-                    truncatePreview(pr.body())
-                );
+                        "Pull Request", pr.title(), pr.user().login(), pr.createdAt(), truncatePreview(pr.body()));
             }
         }
 
@@ -160,12 +147,7 @@ public class GitHubClient implements LinkUpdateClient {
             if (issue.createdAt() != null && issue.createdAt().isAfter(latestTime)) {
                 latestTime = issue.createdAt();
                 latest = new GitHubUpdateDetails(
-                    "Issue",
-                    issue.title(),
-                    issue.user().login(),
-                    issue.createdAt(),
-                    truncatePreview(issue.body())
-                );
+                        "Issue", issue.title(), issue.user().login(), issue.createdAt(), truncatePreview(issue.body()));
             }
         }
 
@@ -179,36 +161,28 @@ public class GitHubClient implements LinkUpdateClient {
     }
 
     public record RepositoryResponse(
-        @JsonProperty("id") long id,
-        @JsonProperty("name") String name,
-        @JsonProperty("pushed_at") OffsetDateTime pushedAt
-    ) {}
+            @JsonProperty("id") long id,
+            @JsonProperty("name") String name,
+            @JsonProperty("pushed_at") OffsetDateTime pushedAt) {}
 
     public record PullRequest(
-        @JsonProperty("title") String title,
-        @JsonProperty("body") String body,
-        @JsonProperty("user") User user,
-        @JsonProperty("created_at") OffsetDateTime createdAt,
-        @JsonProperty("updated_at") OffsetDateTime updatedAt
-    ) {}
+            @JsonProperty("title") String title,
+            @JsonProperty("body") String body,
+            @JsonProperty("user") User user,
+            @JsonProperty("created_at") OffsetDateTime createdAt,
+            @JsonProperty("updated_at") OffsetDateTime updatedAt) {}
 
     public record Issue(
-        @JsonProperty("title") String title,
-        @JsonProperty("body") String body,
-        @JsonProperty("user") User user,
-        @JsonProperty("created_at") OffsetDateTime createdAt,
-        @JsonProperty("updated_at") OffsetDateTime updatedAt,
-        @JsonProperty("state") String state,
-        @JsonProperty("pull_request") Map<String, Object> pullRequest
-    ) {}
+            @JsonProperty("title") String title,
+            @JsonProperty("body") String body,
+            @JsonProperty("user") User user,
+            @JsonProperty("created_at") OffsetDateTime createdAt,
+            @JsonProperty("updated_at") OffsetDateTime updatedAt,
+            @JsonProperty("state") String state,
+            @JsonProperty("pull_request") Map<String, Object> pullRequest) {}
 
     public record User(@JsonProperty("login") String login) {}
 
     public record GitHubUpdateDetails(
-        String type,
-        String title,
-        String username,
-        OffsetDateTime createdAt,
-        String preview
-    ) {}
+            String type, String title, String username, OffsetDateTime createdAt, String preview) {}
 }

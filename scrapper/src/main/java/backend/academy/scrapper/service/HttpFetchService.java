@@ -1,15 +1,13 @@
 package backend.academy.scrapper.service;
 
-
+import java.time.Duration;
+import java.util.logging.Logger;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
-
-import java.time.Duration;
-import java.util.logging.Logger;
 
 @Service
 public class HttpFetchService {
@@ -20,60 +18,61 @@ public class HttpFetchService {
         this.webClient = genericWebClient;
     }
 
+    public FetchedPage fetchSync(String url, String etag, String lastModified) {
+        return fetch(url, etag, lastModified).block();
+    }
+
     public Mono<FetchedPage> fetch(String url, String etag, String lastModified) {
 
-        LOGGER.info(() -> "HTTP FETCH → " + url +
-            " | etag=" + etag +
-            " | lastModified=" + lastModified);
+        LOGGER.info(() -> "HTTP FETCH → " + url + " | etag=" + etag + " | lastModified=" + lastModified);
 
-        return webClient.get()
-            .uri(url)
-            .headers(h -> {
-                if (etag != null && !etag.isBlank()) {
-                    h.setIfNoneMatch(etag);
-                    LOGGER.fine(() -> " → Added If-None-Match: " + etag);
-                }
-                if (lastModified != null && !lastModified.isBlank()) {
-                    h.set(HttpHeaders.IF_MODIFIED_SINCE, lastModified);
-                    LOGGER.fine(() -> " → Added If-Modified-Since: " + lastModified);
-                }
-            })
-            .retrieve()
-            .toEntity(byte[].class)
-            .timeout(Duration.ofSeconds(10))
-            .onErrorResume(ex -> {
-                LOGGER.warning("HTTP FETCH ERROR (" + url + "): " + ex.getMessage());
-                return Mono.just(ResponseEntity.status(599).build());
-            })
-            .map(resp -> {
-                int sc = resp.getStatusCode().value();
+        return webClient
+                .get()
+                .uri(url)
+                .headers(h -> {
+                    if (etag != null && !etag.isBlank()) {
+                        h.setIfNoneMatch(etag);
+                        LOGGER.fine(() -> " → Added If-None-Match: " + etag);
+                    }
+                    if (lastModified != null && !lastModified.isBlank()) {
+                        h.set(HttpHeaders.IF_MODIFIED_SINCE, lastModified);
+                        LOGGER.fine(() -> " → Added If-Modified-Since: " + lastModified);
+                    }
+                })
+                .retrieve()
+                .toEntity(byte[].class)
+                .timeout(Duration.ofSeconds(10))
+                .onErrorResume(ex -> {
+                    LOGGER.warning("HTTP FETCH ERROR (" + url + "): " + ex.getMessage());
+                    return Mono.just(ResponseEntity.status(599).build());
+                })
+                .map(resp -> {
+                    int sc = resp.getStatusCode().value();
 
-                LOGGER.info(() ->
-                    "HTTP RESPONSE ← " + url +
-                        " | status=" + sc +
-                        " | etag=" + resp.getHeaders().getETag() +
-                        " | lastModified=" + resp.getHeaders().getFirst(HttpHeaders.LAST_MODIFIED) +
-                        " | contentType=" + resp.getHeaders().getContentType()
-                );
+                    LOGGER.info(() -> "HTTP RESPONSE ← " + url + " | status="
+                            + sc + " | etag="
+                            + resp.getHeaders().getETag() + " | lastModified="
+                            + resp.getHeaders().getFirst(HttpHeaders.LAST_MODIFIED) + " | contentType="
+                            + resp.getHeaders().getContentType());
 
-                if (sc == 304) {
-                    LOGGER.info(" → NOT MODIFIED (ETag match)");
-                    return FetchedPage.notModified();
-                }
+                    if (sc == 304) {
+                        LOGGER.info(" → NOT MODIFIED (ETag match)");
+                        return FetchedPage.notModified();
+                    }
 
-                if (sc >= 200 && sc < 300) {
-                    byte[] body = resp.getBody();
-                    MediaType ct = resp.getHeaders().getContentType();
-                    return FetchedPage.modified(
-                        resp.getHeaders().getETag(),
-                        resp.getHeaders().getFirst(HttpHeaders.LAST_MODIFIED),
-                        body, ct
-                    );
-                }
+                    if (sc >= 200 && sc < 300) {
+                        byte[] body = resp.getBody();
+                        MediaType ct = resp.getHeaders().getContentType();
+                        return FetchedPage.modified(
+                                resp.getHeaders().getETag(),
+                                resp.getHeaders().getFirst(HttpHeaders.LAST_MODIFIED),
+                                body,
+                                ct);
+                    }
 
-                LOGGER.warning(" → ERROR RESPONSE: " + sc);
-                return FetchedPage.error(sc);
-            });
+                    LOGGER.warning(" → ERROR RESPONSE: " + sc);
+                    return FetchedPage.error(sc);
+                });
     }
 
     public static final class FetchedPage {
@@ -84,7 +83,13 @@ public class HttpFetchService {
         public final boolean notModified;
         public final Integer statusCode;
 
-        private FetchedPage(String etag, String lastModified, byte[] body, MediaType contentType, boolean notModified, Integer statusCode) {
+        private FetchedPage(
+                String etag,
+                String lastModified,
+                byte[] body,
+                MediaType contentType,
+                boolean notModified,
+                Integer statusCode) {
             this.etag = etag;
             this.lastModified = lastModified;
             this.body = body;

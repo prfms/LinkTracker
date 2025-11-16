@@ -1,8 +1,8 @@
 package backend.academy.scrapper.model;
 
 import jakarta.persistence.*;
-import lombok.Data;
 import java.util.List;
+import lombok.Data;
 
 @Data
 @Entity

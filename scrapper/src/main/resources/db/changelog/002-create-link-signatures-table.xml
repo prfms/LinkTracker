@@ -16,7 +16,7 @@
 
             <column name="last_modified" type="TEXT"/>
 
-            <column name="composite_hash" type="VARCHAR(64)"/>
+            <column name="hash" type="VARCHAR(64)"/>
 
             <column name="updated_at" type="TIMESTAMP WITH TIME ZONE">
                 <constraints nullable="false"/>

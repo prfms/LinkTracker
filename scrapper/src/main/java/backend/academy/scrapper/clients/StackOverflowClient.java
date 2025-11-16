@@ -23,20 +23,20 @@ public class StackOverflowClient implements LinkUpdateClient {
         String questionId = extractQuestionId(questionUrl);
 
         AnswersResponse response = webClient
-            .get()
-            .uri("/questions/{ids}/answers?order=desc&sort=activity&site=stackoverflow", questionId)
-            .retrieve()
-            .bodyToMono(AnswersResponse.class)
-            .block();
+                .get()
+                .uri("/questions/{ids}/answers?order=desc&sort=activity&site=stackoverflow", questionId)
+                .retrieve()
+                .bodyToMono(AnswersResponse.class)
+                .block();
 
         if (response == null || response.items == null || response.items.isEmpty()) {
             return new UpdateInfo(getQuestionLastActivity(questionId), "Новое обновление");
         }
 
         long maxTimestamp = response.items.stream()
-            .mapToLong(answer -> answer.lastActivityDate)
-            .max()
-            .orElseThrow(() -> new IllegalStateException("Нет данных об ответах"));
+                .mapToLong(answer -> answer.lastActivityDate)
+                .max()
+                .orElseThrow(() -> new IllegalStateException("Нет данных об ответах"));
 
         var time = Instant.ofEpochSecond(maxTimestamp).atOffset(ZoneOffset.UTC);
         return new UpdateInfo(time, "Новое обновление");
@@ -44,11 +44,11 @@ public class StackOverflowClient implements LinkUpdateClient {
 
     private OffsetDateTime getQuestionLastActivity(String questionId) {
         QuestionResponse response = webClient
-            .get()
-            .uri("/questions/{ids}?order=desc&sort=activity&site=stackoverflow", questionId)
-            .retrieve()
-            .bodyToMono(QuestionResponse.class)
-            .block();
+                .get()
+                .uri("/questions/{ids}?order=desc&sort=activity&site=stackoverflow", questionId)
+                .retrieve()
+                .bodyToMono(QuestionResponse.class)
+                .block();
 
         if (response == null || response.items == null || response.items.isEmpty()) {
             throw new IllegalStateException("Вопрос не найден: " + questionId);

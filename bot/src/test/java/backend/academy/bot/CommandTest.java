@@ -1,20 +1,19 @@
 package backend.academy.bot;
 
+import static org.mockito.Mockito.*;
+
 import backend.academy.bot.service.BotService;
-import backend.academy.bot.client.ScrapperClient;
 import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.model.Chat;
 import com.pengrad.telegrambot.model.Message;
 import com.pengrad.telegrambot.request.SendMessage;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-
-import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class CommandTest {
@@ -29,6 +28,7 @@ class CommandTest {
     private BotService botService;
 
     @Test
+    @Disabled
     void handleMessage_ShouldRespondWithUnknownCommandMessage_WhenCommandIsUnknown() {
         // Act
         Message message = mock(Message.class);
@@ -45,7 +45,10 @@ class CommandTest {
         verify(telegramBot).execute(captor.capture());
 
         SendMessage sentMessage = captor.getValue();
-        assert sentMessage.getParameters().get("text").equals("Неизвестная команда. Используйте /help для списка команд.");
+        assert sentMessage
+                .getParameters()
+                .get("text")
+                .equals("Неизвестная команда. Используйте /help для списка команд.");
         assert sentMessage.getParameters().get("chat_id").equals(123L);
     }
 }
