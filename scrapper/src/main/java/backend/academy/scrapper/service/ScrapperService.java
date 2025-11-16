@@ -1,5 +1,6 @@
 package backend.academy.scrapper.service;
 
+import backend.academy.scrapper.clients.GenericHtmlClient;
 import backend.academy.scrapper.clients.GitHubClient;
 import backend.academy.scrapper.clients.StackOverflowClient;
 import backend.academy.scrapper.controller.dto.AddLinkRequestDto;
@@ -66,7 +67,8 @@ public class ScrapperService {
             String url = link.url().toLowerCase();
             UpdateInfo updateInfo = getUpdateInfo(url);
             if (updateInfo == null) {
-                return;
+                LOGGER.info("Обновлений по ссылке " + url + " нет. Пропускаем");
+                continue;
             }
             OffsetDateTime newLastUpdated = updateInfo.lastUpdatedAt();
             LOGGER.info("Ссылка: " + url + " | Старый lastUpdated: " + link.lastUpdated() + " | Новый lastUpdated: "

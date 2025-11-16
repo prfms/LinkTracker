@@ -30,7 +30,7 @@ public class StackOverflowClient implements LinkUpdateClient {
                 .block();
 
         if (response == null || response.items == null || response.items.isEmpty()) {
-            return new UpdateInfo(getQuestionLastActivity(questionId), "Новое обновление");
+            return new UpdateInfo(getQuestionLastActivity(questionId), "Новое обновление по вопросу " + questionId);
         }
 
         long maxTimestamp = response.items.stream()
@@ -39,7 +39,7 @@ public class StackOverflowClient implements LinkUpdateClient {
                 .orElseThrow(() -> new IllegalStateException("Нет данных об ответах"));
 
         var time = Instant.ofEpochSecond(maxTimestamp).atOffset(ZoneOffset.UTC);
-        return new UpdateInfo(time, "Новое обновление");
+        return new UpdateInfo(time, "Новое обновление по вопросу " + questionId);
     }
 
     private OffsetDateTime getQuestionLastActivity(String questionId) {

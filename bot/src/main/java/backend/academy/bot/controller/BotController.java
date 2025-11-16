@@ -27,7 +27,7 @@ public class BotController {
         List<Long> tgIds = linkUpdate.tgChatIds();
         for (long id : tgIds) {
             LOGGER.info("Отправка пользователю " + id + " " + linkUpdate.description());
-            botService.sendUpdate(id, linkUpdate.url());
+            botService.sendUpdate(id, linkUpdate.url(), linkUpdate.description());
         }
     }
 }

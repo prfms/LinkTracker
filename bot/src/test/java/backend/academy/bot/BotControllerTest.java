@@ -44,7 +44,7 @@ public class BotControllerTest {
                 .andExpect(status().isOk());
 
         // Assert
-        verify(botService, times(1)).sendUpdate(123L, "https://github.com/example/repo");
-        verify(botService, times(1)).sendUpdate(456L, "https://github.com/example/repo");
+        verify(botService, times(1)).sendUpdate(123L, "https://github.com/example/repo", null);
+        verify(botService, times(1)).sendUpdate(456L, "https://github.com/example/repo", null);
     }
 }

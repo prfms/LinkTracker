@@ -2,7 +2,9 @@ package backend.academy.scrapper.service;
 
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
+import java.util.Comparator;
 import java.util.HexFormat;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -21,15 +23,20 @@ public class GenericHtmlExtractor {
                         "[class~=(?i)(ad|ads|advert|banner|promo|sponsor|cookie|consent|subscribe|newsletter|share|social|breadcrumbs|login|signup)]")
                 .remove();
 
-        String title = doc.title() != null ? doc.title().trim() : "";
-        Element main = doc.selectFirst("article, main");
-        if (main == null) main = doc.body();
-        if (main == null) main = doc;
+        String title = Optional.ofNullable(doc.title()).map(String::trim).orElse("");
 
-        String text = main.select("p, h1, h2, h3").eachText().stream()
+        Element main = doc.selectFirst("article, main, [itemprop=articleBody], [role=main]");
+        if (main == null) {
+            main = findContentHeavyDiv(doc.body());
+        }
+        if (main == null) main = doc.body();
+
+        String text = main.select("p, h1, h2, h3, li").eachText().stream()
                 .map(this::normalize)
-                .filter(s -> s.length() >= 80)
+                .filter(s -> s.length() >= 40)
                 .collect(Collectors.joining("\n\n"));
+
+        if (text.isBlank()) text = doc.text();
 
         if (text.length() > 2000) text = text.substring(0, 2000);
 
@@ -37,6 +44,14 @@ public class GenericHtmlExtractor {
         String sample = text.length() > 600 ? text.substring(0, 600) : text;
 
         return new Result(compositeHash, sample);
+    }
+
+    private Element findContentHeavyDiv(Element root) {
+        if (root == null) return null;
+
+        return root.select("div").stream()
+                .max(Comparator.comparingInt(div -> div.select("p").text().length()))
+                .orElse(root);
     }
 
     private String normalize(String s) {

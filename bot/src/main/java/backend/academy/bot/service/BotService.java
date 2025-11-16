@@ -55,8 +55,8 @@ public class BotService {
         });
     }
 
-    public void sendUpdate(Long chatId, String url) {
-        bot.execute(new SendMessage(chatId, "Обнаружены изменения по ссылке " + url));
+    public void sendUpdate(Long chatId, String url, String description) {
+        bot.execute(new SendMessage(chatId, description + "\n" + url));
     }
 
     public void handleMessage(Message message) {
@@ -98,7 +98,8 @@ public class BotService {
                 BotCommand[] commands = bot.execute(getMyCommands).commands();
 
                 if (commands != null && commands.length > 0) {
-                    StringBuilder helpMessage = new StringBuilder("Доступные команды:\n");
+                    StringBuilder helpMessage = new StringBuilder(
+                            "Бот отслеживает изменения содержимого и уведомляет вас при обновлениях.\nДоступные команды:\n");
                     for (BotCommand command : commands) {
                         helpMessage
                                 .append("/")
@@ -140,10 +141,23 @@ public class BotService {
                 if (!isValidLink(text)) {
                     sendMessage(
                             chatId,
-                            "Некорректный формат ссылки.\n" + "Допустимые форматы:\n"
-                                    + "- https://github.com/user/repo\n"
-                                    + "- https://stackoverflow.com/questions/12345\n"
-                                    + "Попробуйте ещё раз или введите /exit для выхода.");
+                            """
+                                Некорректный формат ссылки.
+                                Допустимые форматы для отслеживания:
+
+                                • GitHub:
+                                    - https://github.com/user/repo
+                                    - https://github.com/user/repo/issues/123
+                                    - https://github.com/user/repo/pull/45
+
+                                • StackOverflow:
+                                    - https://stackoverflow.com/questions/12345
+
+                                • Обычные веб-страницы (HTML):
+                                    - Любая ссылка вида https://example.com
+
+                                Попробуйте ещё раз или введите /exit для выхода.
+                                """);
                     return;
                 }
                 try {

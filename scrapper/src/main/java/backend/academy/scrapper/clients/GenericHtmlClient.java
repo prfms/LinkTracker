@@ -1,12 +1,12 @@
-package backend.academy.scrapper.service;
+package backend.academy.scrapper.clients;
 
-import backend.academy.scrapper.clients.LinkUpdateClient;
 import backend.academy.scrapper.controller.dto.UpdateInfo;
 import backend.academy.scrapper.model.Link;
 import backend.academy.scrapper.model.LinkSignature;
 import backend.academy.scrapper.repository.LinkRepository;
 import backend.academy.scrapper.repository.LinkSignatureRepository;
-import backend.academy.scrapper.scheduler.BotNotifier;
+import backend.academy.scrapper.service.GenericHtmlExtractor;
+import backend.academy.scrapper.service.HttpFetchService;
 import java.time.OffsetDateTime;
 import java.util.Objects;
 import java.util.Optional;
@@ -25,7 +25,6 @@ public class GenericHtmlClient implements LinkUpdateClient {
     private final GenericHtmlExtractor extractor;
     private final LinkSignatureRepository signatures;
     private final LinkRepository linkRepository;
-    private final BotNotifier botNotifier;
 
     @Override
     public UpdateInfo getUpdateInfo(String url) {
@@ -70,7 +69,7 @@ public class GenericHtmlClient implements LinkUpdateClient {
 
             if (!changed) {
                 LOGGER.info(() -> "Хэши совпадают, изменений нет → " + url);
-                return new UpdateInfo(prev != null ? prev.updatedAt() : OffsetDateTime.now(), "Изменений нет");
+                return null;
             }
 
             LOGGER.info(() -> (firstTime ? "Первая проверка" : "Обнаружено изменение") + " → " + url);
@@ -93,9 +92,7 @@ public class GenericHtmlClient implements LinkUpdateClient {
 
             signatures.save(sig);
 
-            String description = firstTime ? "Добавлена новая HTML-страница" : "Страница обновилась.";
-
-            return new UpdateInfo(sig.updatedAt(), description);
+            return firstTime ? null : new UpdateInfo(sig.updatedAt(), "Получено обновление по ссылке:");
 
         } catch (Exception e) {
             LOGGER.warning(() -> "Ошибка проверки HTML ссылки: " + url + " → " + e.getMessage());
