@@ -8,6 +8,7 @@ import backend.academy.scrapper.repository.LinkSignatureRepository;
 import backend.academy.scrapper.service.GenericHtmlExtractor;
 import backend.academy.scrapper.service.HttpFetchService;
 import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.logging.Logger;
@@ -50,7 +51,7 @@ public class GenericHtmlClient implements LinkUpdateClient {
             if (fetched.notModified) {
                 LOGGER.info(() -> "304 Not Modified → " + url);
                 return new UpdateInfo(
-                        prev != null ? prev.updatedAt() : OffsetDateTime.now(), "Изменений не обнаружено");
+                        prev != null ? prev.updatedAt() : OffsetDateTime.now(ZoneOffset.UTC), "Изменений не обнаружено");
             }
 
             if (fetched.statusCode != null && fetched.statusCode >= 400) {
@@ -80,13 +81,13 @@ public class GenericHtmlClient implements LinkUpdateClient {
                         .etag(fetched.etag)
                         .lastModified(fetched.lastModified)
                         .hash(extracted.compositeHash())
-                        .updatedAt(OffsetDateTime.now())
+                        .updatedAt(OffsetDateTime.now(ZoneOffset.UTC))
                         .build();
             } else {
                 prev.etag(fetched.etag);
                 prev.lastModified(fetched.lastModified);
                 prev.hash(extracted.compositeHash());
-                prev.updatedAt(OffsetDateTime.now());
+                prev.updatedAt(OffsetDateTime.now(ZoneOffset.UTC));
                 sig = prev;
             }
 

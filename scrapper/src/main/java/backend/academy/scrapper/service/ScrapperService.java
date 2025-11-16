@@ -13,6 +13,7 @@ import backend.academy.scrapper.model.LinkDto;
 import backend.academy.scrapper.repository.CommonRepository;
 import backend.academy.scrapper.scheduler.BotNotifier;
 import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.List;
 import java.util.logging.Logger;
 import lombok.RequiredArgsConstructor;
@@ -49,7 +50,7 @@ public class ScrapperService {
     }
 
     public int addLink(long chatId, AddLinkRequestDto link) {
-        return repository.addLink(link.link(), chatId, OffsetDateTime.now());
+        return repository.addLink(link.link(), chatId, OffsetDateTime.now(ZoneOffset.UTC));
     }
 
     public LinkDto deleteLink(long chatId, RemoveLinkRequestDto link) {
