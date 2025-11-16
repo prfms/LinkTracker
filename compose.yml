@@ -1,0 +1,55 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15
+    container_name: postgres
+    environment:
+      POSTGRES_DB: my_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    networks:
+      - app-network
+
+  scrapper:
+    build: ./scrapper
+    container_name: scrapper
+    depends_on:
+      - postgres
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/my_db
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: postgres
+      SPRING_PROFILES_ACTIVE: docker
+      SERVER_PORT: 8081
+      APP_GITHUB_TOKEN: ${APP_GITNUB_TOKEN}
+    ports:
+      - "8081:8081"
+    networks:
+      - app-network
+
+  bot:
+    build: ./bot
+    container_name: bot
+    depends_on:
+      - scrapper
+    environment:
+      SCRAPPER_BASE_URL: http://scrapper:8081
+      APP_TELEGRAMTOKEN: ${APP_TELEGRAMTOKEN}
+      SPRING_PROFILES_ACTIVE: docker
+    ports:
+      - "8082:8082"
+    networks:
+      - app-network
+    command: /bin/sh -c "sleep 20 && java -jar app.jar"
+
+volumes:
+  pg_data:
+
+networks:
+  app-network:
+    driver: bridge

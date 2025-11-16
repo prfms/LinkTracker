@@ -1,5 +1,6 @@
 app:
   github-token: ${GITHUB_TOKEN} # env variable
+  github-base-url: https://api.github.com
   stackoverflow:
     key: ${SO_TOKEN_KEY}
     access-token: ${SO_ACCESS_TOKEN}
@@ -8,14 +9,27 @@ spring:
   application:
     name: Scrapper
   liquibase:
-    enabled: false
+    change-log: classpath:db/changelog/changelog-master.xml
+    enabled: true
   jpa:
     hibernate:
       ddl-auto: validate
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
     open-in-view: false
+  datasource:
+    url: jdbc:postgresql://localhost:5432/my_db
+    username: postgres
+    password: postgres
 
 server:
   port: 8081
+
+bot:
+  url: localhost
+  port: 8082
 
 springdoc:
   swagger-ui:
